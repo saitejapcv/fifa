@@ -293,6 +293,20 @@
               <span>Local fallback engine active.</span>
             </div>
           </div>
+
+          <div class="settings-section">
+            <h2 class="settings-section-title">Football API (Football-Data.org)</h2>
+            <label class="form-label" for="football-api-key">API Token</label>
+            <div class="api-key-input">
+              <input id="football-api-key" class="form-input" type="password" autocomplete="off" spellcheck="false" placeholder="Register free at football-data.org">
+              <button id="save-football-key" class="btn btn-primary" type="button">Save</button>
+              <button id="clear-football-key" class="btn btn-ghost" type="button">Clear</button>
+            </div>
+            <div id="football-key-status" class="api-key-status" aria-live="polite">
+              <span class="status-dot warning"></span>
+              <span>Mock data active.</span>
+            </div>
+          </div>
           <div class="settings-section">
             <h2 class="settings-section-title">Simulation Controls</h2>
             <div class="grid-3">
@@ -341,6 +355,7 @@
     <script src="js/utils.js" defer></script>
     <script src="js/ai-engine.js" defer></script>
     <script src="js/gemini-api.js" defer></script>
+    <script src="js/football-api.js" defer></script>
     <script src="js/simulator.js" defer></script>
     <script src="js/stadium-map.js" defer></script>
     <script src="js/incidents.js" defer></script>

@@ -385,12 +385,37 @@
     `;
   };
 
-  const renderMatchHub = () => {
+  const renderMatchHub = async () => {
     const matchHub = $('#fan-match-hub');
     if (!matchHub) return;
 
-    const live = state.liveMatches[state.venueId] || { teams: 'No Match scheduled', score: '0-0', time: 'T-00' };
-    const history = state.previousMatches[state.venueId] || [];
+    let live = state.liveMatches[state.venueId] || { teams: 'No Match scheduled', score: '0-0', time: 'T-00' };
+    let history = state.previousMatches[state.venueId] || [];
+
+    if (window.FootballClient?.hasApiKey()) {
+      try {
+        const matches = await window.FootballClient.getMatches();
+        const activeMatch = matches.find(m => m.status === 'LIVE' || m.status === 'IN_PLAY' || m.status === 'LIVE_MATCH') || matches[0];
+        if (activeMatch) {
+          live = {
+            teams: `${activeMatch.homeTeam.name} vs. ${activeMatch.awayTeam.name}`,
+            score: `${activeMatch.score.fullTime.home} - ${activeMatch.score.fullTime.away}`,
+            time: activeMatch.status === 'LIVE' ? 'LIVE' : 'Scheduled'
+          };
+        }
+        
+        const schedule = await window.FootballClient.getSchedule();
+        if (schedule && schedule.length > 0) {
+          history = schedule.slice(0, 3).map(m => [
+            `${m.homeTeam.name} vs. ${m.awayTeam.name}`,
+            m.status === 'FINISHED' ? `${m.score.fullTime.home}-${m.score.fullTime.away}` : new Date(m.utcDate).toLocaleDateString()
+          ]);
+        }
+      } catch (err) {
+        console.warn('Failed to load real-time matches from Football API:', err);
+      }
+    }
+
     const venue = getVenue();
 
     let historyHTML = '';
@@ -422,8 +447,52 @@
         <ul style="display: flex; flex-direction: column; gap: var(--space-1); padding: 0;">
           ${historyHTML}
         </ul>
+        <button id="view-squad-btn" class="btn btn-ghost btn-sm" style="width: 100%; margin-top: var(--space-3); border: 1px dashed var(--border-medium);" type="button">👥 View Team Roster & Players</button>
       </div>
     `;
+
+    // Bind squad modal viewer
+    matchHub.querySelector('#view-squad-btn')?.addEventListener('click', async () => {
+      const teamId = state.venueId === 'metlife' ? 757 : 759; // Default USA or Germany IDs
+      toast('Loading squad...', 'Fetching real-time team roster.', 'info');
+      try {
+        const squadData = await window.FootballClient.getTeamSquad(teamId);
+        openRosterModal(squadData);
+      } catch (err) {
+        toast('Squad load failed', err.message, 'danger');
+      }
+    });
+  };
+
+  const openRosterModal = (squadData) => {
+    let modal = $('#roster-modal');
+    if (!modal) {
+      modal = create('div', 'emergency-overlay');
+      modal.id = 'roster-modal';
+      modal.style.background = 'rgba(11, 15, 25, 0.95)';
+      document.body.appendChild(modal);
+    }
+    
+    const playersHTML = (squadData.squad || []).map(player => `
+      <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px dashed var(--border-subtle);">
+        <div>
+          <strong style="color: var(--text-primary);">${player.name}</strong>
+          <div style="font-size: var(--text-xs); color: var(--text-muted);">${player.position || 'Player'}</div>
+        </div>
+        <span style="font-size: var(--text-xs); color: var(--gold);">${player.nationality}</span>
+      </div>
+    `).join('');
+    
+    modal.innerHTML = `
+      <button id="roster-modal-close" class="emergency-dismiss" type="button" style="border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); background: transparent; color: var(--text-secondary); cursor: pointer;">Close</button>
+      <h2 class="emergency-title" style="color: var(--gold); margin-bottom: var(--space-4); text-align: center;">👥 ${squadData.name} Roster</h2>
+      <div style="max-height: 400px; overflow-y: auto; text-align: left; padding: 0 var(--space-2); margin-top: var(--space-4);">
+        ${playersHTML}
+      </div>
+    `;
+    
+    modal.classList.add('active');
+    modal.querySelector('#roster-modal-close').addEventListener('click', () => modal.classList.remove('active'));
   };
 
   const makeInfoRow = (label, value) => {
@@ -646,6 +715,15 @@
       text.textContent = window.GeminiClient?.hasApiKey() ? 'Gemini API key saved locally.' : 'Local fallback engine active.';
       apiStatus.append(dot, text);
     }
+    
+    const footballStatus = $('#football-key-status');
+    if (footballStatus) {
+      footballStatus.replaceChildren();
+      const dot = create('span', `status-dot ${window.FootballClient?.hasApiKey() ? 'success' : 'warning'}`);
+      const text = create('span');
+      text.textContent = window.FootballClient?.hasApiKey() ? 'Live Football API active.' : 'Mock data active.';
+      footballStatus.append(dot, text);
+    }
   };
 
   const updateNavigationVisibility = () => {
@@ -798,6 +876,22 @@
       window.GeminiClient.clearApiKey();
       $('#gemini-api-key').value = '';
       toast('API key cleared', 'Local fallback engine is active.', 'info');
+      renderHeader();
+    });
+    $('#save-football-key')?.addEventListener('click', () => {
+      try {
+        window.FootballClient.saveApiKey($('#football-api-key')?.value || '');
+        $('#football-api-key').value = '';
+        toast('Football token saved', 'Matches and statistics will load live from Football-Data.org.', 'success');
+      } catch (error) {
+        toast('Token rejected', error.message, 'danger');
+      }
+      renderHeader();
+    });
+    $('#clear-football-key')?.addEventListener('click', () => {
+      window.FootballClient.clearApiKey();
+      $('#football-api-key').value = '';
+      toast('Football token cleared', 'Mock data mode is active.', 'info');
       renderHeader();
     });
     $('#simulate-crowd-surge')?.addEventListener('click', () => (window.mutateSimulation || mutateSimulation)('surge'));
