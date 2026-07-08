@@ -287,17 +287,17 @@
 ---
 
 ### Task T-017: Live Football API Integration (Football-Data.org)
-- **Status**: `[/]`
+- **Status**: `[x]`
 - **Assigned Agent**: Antigravity (Orchestrator)
 - **Model**: Claude Opus 4.6 (Thinking)
 - **Priority**: Medium
 - **Description**: Add settings UI fields for Football API key, create football-api.js wrapper for fetching matches/squads/schedules, and wire dashboard views to fetch live API data.
 - **Deliverable**: `index.html`, `js/football-api.js`, `js/dashboard.js`
 - **Acceptance Criteria**:
-  - [ ] Football API Key input field added to Settings page.
-  - [ ] API helper football-api.js created with REST endpoints and baseline fallback.
-  - [ ] Dashboard view successfully draws scores, players, and fixtures from live API when key is present.
-- **Validation Result**: In Progress
+  - [x] Football API Key input field added to Settings page.
+  - [x] API helper football-api.js created with REST endpoints and baseline fallback.
+  - [x] Dashboard view successfully draws scores, players, and fixtures from live API when key is present.
+- **Validation Result**: ✅ PASS
 - **Chain-Prompt Iterations**: 0
 
 

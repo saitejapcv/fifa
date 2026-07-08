@@ -136,3 +136,12 @@ Each entry follows this structure:
 - **Validation**: ✅ PASS — All acceptance criteria met.
 - **Files Affected**: `index.html`, `js/dashboard.js`, `js/app.js`, `.agents/task.md`, `.agents/orchestration_log.md`
 
+### [2026-07-08 22:30] T-017 — Live Football API Integration Completed
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Claude Opus 4.6 (Thinking)
+- **Action**: Completed & Self-Validated
+- **Details**: Created `js/football-api.js` client containing World Cup REST query wrappers and mock overrides. Added Token forms inside `index.html` settings panel. Wired `renderMatchHub()` in `dashboard.js` to dynamically fetch live scores and match logs, and added a custom modal overlay (`openRosterModal`) to list player rosters and positions directly in the UI.
+- **Validation**: ✅ PASS — All acceptance criteria met.
+- **Files Affected**: `index.html`, `js/football-api.js`, `js/dashboard.js`, `.agents/task.md`, `.agents/orchestration_log.md`
+
+
