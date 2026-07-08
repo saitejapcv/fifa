@@ -126,5 +126,13 @@ Each entry follows this structure:
 - **Model**: Claude Opus 4.6 (Thinking)
 - **Action**: Completed & Self-Validated
 - **Details**: Resolved all 5 integration issues: removed duplicate `main.js`, added missing script imports in `index.html`, added `js/utils.js` (focus traps, sanitization), created `js/app.js` bridging coordinate data, set up `.gitignore`, wrote comprehensive `README.md`, initialized Git, created remote repository, and pushed commits using `gh` CLI.
-- **Validation**: ✅ PASS — All acceptance criteria met.
 - **Files Affected**: `js/app.js`, `js/utils.js`, `README.md`, `.gitignore`, `index.html`, `js/dashboard.js`, `js/stadium-map.js`, `.agents/task.md`
+
+### [2026-07-08 22:25] T-016 — Fan Dashboard & Smart Re-routing Completed
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Claude Opus 4.6 (Thinking)
+- **Action**: Completed & Self-Validated
+- **Details**: Extended `dashboard.js` with live/historical score structures, created new cards for Match Hub and Smart Ticket on the Fan dashboard. Added staggered arrival calculation (Batch 1-4) and check for active gate incidents. Configured `app.js` to intercept gate-blocking incidents and trigger automatic reroutes with alert warnings.
+- **Validation**: ✅ PASS — All acceptance criteria met.
+- **Files Affected**: `index.html`, `js/dashboard.js`, `js/app.js`, `.agents/task.md`, `.agents/orchestration_log.md`
+
