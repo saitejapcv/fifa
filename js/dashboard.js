@@ -61,7 +61,27 @@
       waterSavedLiters: 182000,
       wasteDiversionPct: 68
     },
-    blockedExits: ['south']
+    blockedExits: ['south'],
+    myTicket: {
+      section: '104',
+      assignedGate: 'A',
+      ticketNo: 'T-10488',
+      batch: 3
+    },
+    liveMatches: {
+      metlife: { teams: 'USA vs. Germany', score: '2-1', time: '18:30 kickoff' },
+      sofi: { teams: 'Mexico vs. Brazil', score: '0-0', time: '20:00 kickoff' },
+      azteca: { teams: 'Canada vs. Argentina', score: '1-3', time: 'Final' },
+      att: { teams: 'England vs. France', score: '1-1', time: '75\'' },
+      bmo: { teams: 'Japan vs. Spain', score: '0-2', time: 'Halftime' }
+    },
+    previousMatches: {
+      metlife: [['USA vs. Italy', '3-2'], ['Germany vs. Mexico', '1-1']],
+      sofi: [['Brazil vs. Colombia', '2-0'], ['Argentina vs. Ecuador', '3-1']],
+      azteca: [['Mexico vs. France', '2-1']],
+      att: [['England vs. Portugal', '0-1']],
+      bmo: [['Canada vs. Morocco', '1-0']]
+    }
   };
 
   const state = structuredClone(initialState);
@@ -205,9 +225,19 @@
   };
 
   const renderDashboard = () => {
+    const fanSection = $('#fan-dashboard-enhancements');
+    if (fanSection) {
+      fanSection.style.display = state.role === 'fan' ? 'grid' : 'none';
+    }
+
     const kpis = $('#dashboard-kpis');
     if (!kpis) return;
     kpis.replaceChildren(...getRoleKpis().map(createKpiCard));
+
+    if (state.role === 'fan') {
+      renderSmartTicket();
+      renderMatchHub();
+    }
 
     const density = window.StadiumAI.analyzeCrowdDensity(state.sectors);
     const gates = window.StadiumAI.optimizeGateFlow(state.gates);
@@ -247,6 +277,153 @@
         makeInfoRow('Highest density', density.predictedPeak)
       );
     }
+  };
+
+  const renderSmartTicket = () => {
+    const ticketCard = $('#fan-ticket-card');
+    if (!ticketCard) return;
+
+    const ticket = state.myTicket;
+    const assignedGate = ticket.assignedGate;
+    const assignedGateObj = state.gates.find(g => g.id === assignedGate);
+
+    // Check if the assigned gate is blocked by any unresolved incident
+    const isGateBlocked = state.incidents.some(i => i.status !== 'resolved' && i.location.toLowerCase().includes(`gate ${assignedGate.toLowerCase()}`));
+
+    let gateStatusHTML = '';
+    
+    if (isGateBlocked) {
+      // Find lowest wait non-blocked alternative gate
+      const nonBlockedGates = state.gates.filter(g => !state.incidents.some(i => i.status !== 'resolved' && i.location.toLowerCase().includes(g.name.toLowerCase())));
+      const optimalGateObj = [...nonBlockedGates].sort((a, b) => a.waitMinutes - b.waitMinutes)[0] || state.gates.find(g => g.id !== assignedGate) || assignedGateObj;
+
+      gateStatusHTML = `
+        <div style="display: flex; gap: var(--space-3); align-items: flex-start; color: var(--danger); background: rgba(255, 56, 96, 0.08); padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid rgba(255, 56, 96, 0.2);">
+          <span style="font-size: var(--text-xl); line-height: 1;">⚠️</span>
+          <div>
+            <div style="font-weight: var(--weight-semibold); margin-bottom: 2px;">AI TRAFFIC ROUTING ALERT</div>
+            <div style="font-size: var(--text-sm); line-height: 1.4;">
+              Your assigned gate (<strong>Gate ${assignedGate}</strong>) is currently blocked due to an active operational delay. 
+              <br><strong style="color: var(--success);">AI Action:</strong> Your batch has been rerouted to <strong>Gate ${optimalGateObj.id}</strong> (wait time: ${optimalGateObj.waitMinutes}m). Proceed there immediately.
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      // Gate is clear. Check if wait time is high and optimal gate is better
+      const optimalGateObj = [...state.gates].sort((a, b) => a.waitMinutes - b.waitMinutes)[0];
+      const waitGap = assignedGateObj ? assignedGateObj.waitMinutes - optimalGateObj.waitMinutes : 0;
+      
+      if (waitGap > 5 && optimalGateObj.id !== assignedGate) {
+        // Recommend redirect
+        gateStatusHTML = `
+          <div style="display: flex; gap: var(--space-3); align-items: flex-start; color: var(--warning); background: rgba(255, 179, 0, 0.08); padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid rgba(255, 179, 0, 0.2);">
+            <span style="font-size: var(--text-xl); line-height: 1;">⚡</span>
+            <div>
+              <div style="font-weight: var(--weight-semibold); margin-bottom: 2px;">AI Travel Optimization</div>
+              <div style="font-size: var(--text-sm); line-height: 1.4;">
+                Traffic is high at <strong>Gate ${assignedGate}</strong> (wait: ${assignedGateObj ? assignedGateObj.waitMinutes : 0}m). 
+                AI recommends entering through <strong>Gate ${optimalGateObj.id}</strong> (wait: ${optimalGateObj.waitMinutes}m) to save <strong>${waitGap} minutes</strong>.
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // Safe route
+        gateStatusHTML = `
+          <div style="display: flex; gap: var(--space-3); align-items: flex-start; color: var(--success); background: rgba(0, 255, 135, 0.08); padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid rgba(0, 255, 135, 0.2);">
+            <span style="font-size: var(--text-xl); line-height: 1;">✅</span>
+            <div>
+              <div style="font-weight: var(--weight-semibold); margin-bottom: 2px;">Route Clear</div>
+              <div style="font-size: var(--text-sm); line-height: 1.4;">
+                Proceed to your assigned entrance <strong>Gate ${assignedGate}</strong>. Wait time is normal (${assignedGateObj ? assignedGateObj.waitMinutes : 0} minutes).
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Staggered batch arrival status
+    const minutesToKickoff = Math.max(0, 75 - state.matchMinute);
+    let batchStatusText = '';
+    let batchStatusColor = 'var(--text-muted)';
+    
+    if (minutesToKickoff > 60) {
+      batchStatusText = 'Upcoming slot (T-75 to T-60). Please prepare to travel.';
+      batchStatusColor = 'var(--info)';
+    } else if (minutesToKickoff > 30) {
+      batchStatusText = 'YOUR ENTRY SLOT IS ACTIVE. Please proceed to the gate.';
+      batchStatusColor = 'var(--success)';
+    } else {
+      batchStatusText = 'Slot has passed. Proceed immediately to avoid general crowd peaks.';
+      batchStatusColor = 'var(--danger)';
+    }
+
+    ticketCard.innerHTML = `
+      <div class="card-header" style="margin-bottom: var(--space-3);">
+        <h2 class="card-title">My Smart Ticket & Gate Guide</h2>
+        <span class="badge badge-info" style="font-family: var(--font-mono);">${ticket.ticketNo}</span>
+      </div>
+      <div class="grid-2" style="gap: var(--space-4); margin-bottom: var(--space-3);">
+        <div>
+          <div class="label" style="font-size: var(--text-xs); margin-bottom: 2px; color: var(--text-muted);">Assigned Seat</div>
+          <div style="font-size: var(--text-lg); font-weight: var(--weight-bold); color: var(--gold);">Section ${ticket.section}</div>
+        </div>
+        <div>
+          <div class="label" style="font-size: var(--text-xs); margin-bottom: 2px; color: var(--text-muted);">Staggered Arrival Slot</div>
+          <div style="font-size: var(--text-lg); font-weight: var(--weight-bold); color: ${batchStatusColor};">Batch ${ticket.batch} (T-60 to T-30)</div>
+        </div>
+      </div>
+      <div style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-4); font-style: italic;">
+        🕒 Current Status: ${batchStatusText}
+      </div>
+      <div class="nav-divider" style="margin: var(--space-3) 0;"></div>
+      <div id="fan-routing-status">
+        ${gateStatusHTML}
+      </div>
+    `;
+  };
+
+  const renderMatchHub = () => {
+    const matchHub = $('#fan-match-hub');
+    if (!matchHub) return;
+
+    const live = state.liveMatches[state.venueId] || { teams: 'No Match scheduled', score: '0-0', time: 'T-00' };
+    const history = state.previousMatches[state.venueId] || [];
+    const venue = getVenue();
+
+    let historyHTML = '';
+    if (history.length > 0) {
+      historyHTML = history.map(match => `
+        <li style="display: flex; justify-content: space-between; font-size: var(--text-sm); border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-1); margin-bottom: var(--space-1);">
+          <span style="color: var(--text-secondary);">${match[0]}</span>
+          <strong style="color: var(--gold); font-family: var(--font-mono);">${match[1]}</strong>
+        </li>
+      `).join('');
+    } else {
+      historyHTML = `<li style="font-size: var(--text-sm); color: var(--text-muted);">No history at this stadium.</li>`;
+    }
+
+    matchHub.innerHTML = `
+      <div class="card-header" style="margin-bottom: var(--space-3);">
+        <h2 class="card-title">Match Hub</h2>
+        <span class="badge badge-success">Live Score</span>
+      </div>
+      <div style="text-align: center; padding: var(--space-2) 0; margin-bottom: var(--space-2);">
+        <div style="font-size: var(--text-xs); text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 4px;">At ${venue.name}</div>
+        <div style="font-size: var(--text-lg); font-weight: var(--weight-bold); margin: var(--space-1) 0;">${live.teams}</div>
+        <div style="font-family: var(--font-mono); font-size: var(--text-3xl); font-weight: var(--weight-bold); color: var(--gold); letter-spacing: 2px; margin: 4px 0;">${live.score}</div>
+        <div style="font-size: var(--text-sm); color: var(--text-secondary); font-family: var(--font-mono);">${live.time}</div>
+      </div>
+      <div class="nav-divider" style="margin: var(--space-3) 0;"></div>
+      <div>
+        <div class="label" style="font-size: var(--text-xs); margin-bottom: var(--space-2); color: var(--text-muted);">Previous Scores at this Stadium</div>
+        <ul style="display: flex; flex-direction: column; gap: var(--space-1); padding: 0;">
+          ${historyHTML}
+        </ul>
+      </div>
+    `;
   };
 
   const makeInfoRow = (label, value) => {

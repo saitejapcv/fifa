@@ -264,3 +264,23 @@
   - [x] Git repo created and pushed to GitHub
 - **Validation Result**: ✅ PASS
 - **Chain-Prompt Iterations**: 0
+
+---
+
+## Phase 3: Post-MVP Feature Enhancements
+
+### Task T-016: Fan Dashboard Enhancements & Smart Gate Re-routing
+- **Status**: `[/]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Claude Opus 4.6 (Thinking)
+- **Priority**: High
+- **Description**: Add match hub (live/past scores), assigned vs optimal gate routing, batch entry timers, and dynamic incident-triggered gate diversion.
+- **Deliverable**: `index.html`, `js/dashboard.js`, `js/app.js`
+- **Acceptance Criteria**:
+  - [ ] Match Hub displays live match details and past score history.
+  - [ ] Smart Ticket Card displays assigned vs. AI-recommended entry gate.
+  - [ ] Staggered batch arrival slots are displayed and calculated.
+  - [ ] Active incidents at a gate automatically trigger redirection warnings.
+- **Validation Result**: In Progress
+- **Chain-Prompt Iterations**: 0
+

@@ -138,12 +138,26 @@
         this.map.addIncident(incident.id, x, y, incident.type, triaged.severity);
       }
 
-      // 4. Trigger alert toast
-      window.StadiumApp.toast(
-        `🚨 AI Incident Alert: ${incident.type}`,
-        `Location: ${incident.location}. Action: ${triaged.action}`,
-        triaged.severity === 'Red' ? 'danger' : triaged.severity === 'Amber' ? 'warning' : 'info'
-      );
+      // Check if this incident blocks the fan's assigned gate
+      const assignedGate = state.myTicket.assignedGate;
+      const isGateBlocked = incident.location.toLowerCase().includes(`gate ${assignedGate.toLowerCase()}`);
+
+      if (isGateBlocked) {
+        const nonBlockedGates = state.gates.filter(g => !g.name.toLowerCase().includes(assignedGate.toLowerCase()));
+        const optimalGateObj = [...nonBlockedGates].sort((a, b) => a.waitMinutes - b.waitMinutes)[0] || state.gates.find(g => g.id !== assignedGate);
+        
+        window.StadiumApp.toast(
+          `⚠️ AI Route Diverted!`,
+          `Gate ${assignedGate} is blocked by a ${incident.type} incident. Your batch has been rerouted to Gate ${optimalGateObj ? optimalGateObj.id : 'B'}.`,
+          'danger'
+        );
+      } else {
+        window.StadiumApp.toast(
+          `🚨 AI Incident Alert: ${incident.type}`,
+          `Location: ${incident.location}. Action: ${triaged.action}`,
+          triaged.severity === 'Red' ? 'danger' : triaged.severity === 'Amber' ? 'warning' : 'info'
+        );
+      }
 
       window.StadiumApp.renderAll();
     }
