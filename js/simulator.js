@@ -204,6 +204,12 @@ class StadiumSimulator {
   }
 
   dispatchIncident() {
+    // Only dispatch background incidents if active role is staff or organizer
+    const activeRole = window.StadiumApp?.state?.role || 'fan';
+    if (activeRole !== 'staff' && activeRole !== 'organizer') {
+      return;
+    }
+
     const types = ['spill', 'medical', 'security', 'ticketing', 'weather'];
     const type = types[Math.floor(Math.random() * types.length)];
     const sectors = Array.from(this.sectorData.keys());

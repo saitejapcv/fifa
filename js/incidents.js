@@ -67,6 +67,11 @@
     resolve.disabled = incident.status === 'resolved';
     resolve.addEventListener('click', () => resolveIncident(incident.id));
 
+    const activeRole = window.StadiumApp?.state?.role || 'fan';
+    if (activeRole !== 'staff' && activeRole !== 'organizer') {
+      resolve.style.display = 'none';
+    }
+
     row.append(title, badge);
     meta.append(timer, teams, resolve);
     body.append(row, location, action, meta);
@@ -151,6 +156,52 @@
       });
     });
     $('#create-incident')?.addEventListener('click', createSimulatedIncident);
+
+    // Bind manual staff report form
+    const form = $('#report-incident-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const type = $('#report-incident-type').value;
+        const location = $('#report-incident-location').value;
+        const density = parseFloat($('#report-incident-density').value) || 3.5;
+        const state = window.StadiumApp.state;
+
+        // Prevent unauthorized reporting
+        if (state.role !== 'staff' && state.role !== 'organizer') {
+          window.StadiumApp.toast('Permission Denied', 'Only Staff or Organizers can file operational incident alerts.', 'danger');
+          return;
+        }
+
+        const incidentId = `INC-${Math.floor(1000 + Math.random() * 9000)}`;
+        const incident = {
+          id: incidentId,
+          type,
+          location,
+          crowdDensity: density,
+          minutesToKickoff: Math.max(0, 75 - state.matchMinute),
+          status: 'open',
+          createdAt: Date.now()
+        };
+
+        state.incidents.unshift(incident);
+
+        // Push pin to map coordinator
+        if (window.appCoordinator && window.appCoordinator.map) {
+          const x = 150 + Math.random() * 500;
+          const y = 100 + Math.random() * 400;
+          window.appCoordinator.map.addIncident(incidentId, x, y, type, window.StadiumAI.triageIncident(incident).severity);
+        }
+
+        const triage = window.StadiumAI.triageIncident(incident);
+        window.StadiumApp.toast('Incident Logged', `${type} filed at ${location}. AI Triage: ${triage.severity}.`, triage.severity === 'Red' ? 'danger' : 'warning');
+        
+        window.StadiumApp.renderAll();
+        renderIncidents();
+        form.reset();
+      });
+    }
+
     window.addEventListener('stadium:state-updated', renderIncidents);
   };
 

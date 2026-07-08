@@ -471,7 +471,38 @@
     }
   };
 
+  const updateNavigationVisibility = () => {
+    const role = state.role;
+    const permissions = {
+      fan: ['dashboard-view', 'map-view', 'queues-view', 'transit-view', 'accessibility-view', 'settings-view'],
+      staff: ['dashboard-view', 'map-view', 'incidents-view', 'gates-view', 'queues-view', 'volunteers-view', 'settings-view'],
+      organizer: ['dashboard-view', 'map-view', 'incidents-view', 'gates-view', 'sustainability-view', 'volunteers-view', 'settings-view']
+    };
+
+    const allowed = permissions[role] || permissions.fan;
+
+    // Sidebar items
+    $$('.nav-item').forEach((item) => {
+      const view = item.dataset.view;
+      const show = allowed.includes(view);
+      item.style.display = show ? 'flex' : 'none';
+    });
+
+    // Mobile nav items
+    $$('.mobile-nav-item').forEach((item) => {
+      const view = item.dataset.view;
+      const show = allowed.includes(view);
+      item.style.display = show ? 'flex' : 'none';
+    });
+
+    // If active view is now blocked, redirect to dashboard-view
+    if (!allowed.includes(state.selectedView)) {
+      setView('dashboard-view');
+    }
+  };
+
   const renderAll = () => {
+    updateNavigationVisibility();
     renderHeader();
     renderDashboard();
     renderMap();
