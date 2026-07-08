@@ -121,8 +121,10 @@ Each entry follows this structure:
 - **Validation**: ✅ PASS — All criteria met.
 - **Issues Found**: `main.js` conflicts with dashboard.js init; will be removed in T-015.
 
-### [2026-07-08 20:16] T-015 — Integration Started
+### [2026-07-08 20:16] T-015 — Integration Completed
 - **Agent**: Antigravity (Orchestrator)
 - **Model**: Claude Opus 4.6 (Thinking)
-- **Action**: Started integration task
-- **Details**: Will resolve 5 integration issues identified in validation: remove main.js, fix script tags, wire simulator to dashboard, fix map container, create README and .gitignore.
+- **Action**: Completed & Self-Validated
+- **Details**: Resolved all 5 integration issues: removed duplicate `main.js`, added missing script imports in `index.html`, added `js/utils.js` (focus traps, sanitization), created `js/app.js` bridging coordinate data, set up `.gitignore`, wrote comprehensive `README.md`, initialized Git, created remote repository, and pushed commits using `gh` CLI.
+- **Validation**: ✅ PASS — All acceptance criteria met.
+- **Files Affected**: `js/app.js`, `js/utils.js`, `README.md`, `.gitignore`, `index.html`, `js/dashboard.js`, `js/stadium-map.js`, `.agents/task.md`
