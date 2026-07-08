@@ -1,0 +1,583 @@
+/* ============================================
+   FIFA 2026 Smart Stadium — View-Specific Styles
+   ============================================ */
+
+/* ═══════════════════════════════════════════
+   Stadium Map View
+   ═══════════════════════════════════════════ */
+.map-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.map-sector {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  stroke: var(--border-subtle);
+  stroke-width: 1;
+}
+
+.map-sector:hover {
+  stroke: var(--text-primary);
+  stroke-width: 2;
+  filter: brightness(1.3);
+}
+
+.map-sector.selected {
+  stroke: var(--info);
+  stroke-width: 2.5;
+  animation: sectorPulse 2s ease-in-out infinite;
+}
+
+@keyframes sectorPulse {
+  0%, 100% { stroke-opacity: 1; }
+  50% { stroke-opacity: 0.5; }
+}
+
+/* ── Heatmap Color Classes ── */
+.density-safe { fill: var(--heatmap-safe); fill-opacity: 0.4; }
+.density-moderate { fill: var(--heatmap-moderate); fill-opacity: 0.5; }
+.density-crowded { fill: var(--heatmap-crowded); fill-opacity: 0.55; }
+.density-critical { fill: var(--heatmap-critical); fill-opacity: 0.6; }
+
+/* ── Map Tooltip ── */
+.map-tooltip {
+  position: absolute;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  pointer-events: none;
+  z-index: var(--z-dropdown);
+  box-shadow: var(--shadow-lg);
+  min-width: 180px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.map-tooltip.visible {
+  opacity: 1;
+}
+
+.map-tooltip-title {
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  margin-bottom: var(--space-2);
+}
+
+.map-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+}
+
+.map-tooltip-label {
+  color: var(--text-muted);
+}
+
+.map-tooltip-value {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+}
+
+/* ── Map Controls ── */
+.map-controls {
+  position: absolute;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.map-controls .btn-icon {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+}
+
+/* ── Gate Markers ── */
+.gate-marker {
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.gate-marker:hover {
+  transform: scale(1.2);
+}
+
+.gate-marker-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--text-primary);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* ── Incident Pins ── */
+.incident-pin {
+  cursor: pointer;
+}
+
+.incident-pin-dot {
+  animation: incidentPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes incidentPulse {
+  0%, 100% { r: 5; opacity: 1; }
+  50% { r: 10; opacity: 0.4; }
+}
+
+/* ── Prediction Overlay ── */
+.prediction-overlay {
+  fill: none;
+  stroke: var(--warning);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  opacity: 0.6;
+  animation: dashFlow 1s linear infinite;
+}
+
+@keyframes dashFlow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -10; }
+}
+
+/* ── Map Legend ── */
+.map-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   Dashboard View
+   ═══════════════════════════════════════════ */
+.dashboard-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.dashboard-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 1200px) {
+  .dashboard-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   Incident Command View
+   ═══════════════════════════════════════════ */
+.incident-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.incident-filters {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all var(--transition-fast);
+}
+
+.filter-chip.active {
+  border-color: var(--info);
+  color: var(--info);
+  background: rgba(0, 240, 255, 0.05);
+}
+
+/* ═══════════════════════════════════════════
+   Queue & Services View
+   ═══════════════════════════════════════════ */
+.queue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.queue-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.queue-card-type {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.queue-wait-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  margin-bottom: var(--space-1);
+}
+
+.queue-wait-time.low { color: var(--success); }
+.queue-wait-time.medium { color: var(--warning); }
+.queue-wait-time.high { color: var(--danger); }
+
+.queue-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.queue-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 1s ease;
+}
+
+/* ═══════════════════════════════════════════
+   Transportation Hub View
+   ═══════════════════════════════════════════ */
+.transit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.transit-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.transit-mode-icon {
+  font-size: var(--text-xl);
+  margin-right: var(--space-2);
+}
+
+.transit-eta {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--success);
+}
+
+/* ═══════════════════════════════════════════
+   Sustainability Panel View
+   ═══════════════════════════════════════════ */
+.sustainability-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-8);
+}
+
+.score-circle {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--radius-full);
+  border: 6px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.score-circle::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: var(--radius-full);
+  border: 6px solid transparent;
+  border-top-color: var(--success);
+  animation: scoreRotate 3s linear infinite;
+}
+
+@keyframes scoreRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.score-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: var(--success);
+}
+
+.score-unit {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════
+   Accessibility Center View
+   ═══════════════════════════════════════════ */
+.a11y-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.a11y-setting-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.a11y-setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.a11y-setting-name {
+  font-weight: var(--weight-semibold);
+}
+
+.a11y-setting-desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════
+   Settings & Config View
+   ═══════════════════════════════════════════ */
+.settings-section {
+  margin-bottom: var(--space-8);
+}
+
+.settings-section-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.api-key-input {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.api-key-input .form-input {
+  flex: 1;
+  font-family: var(--font-mono);
+}
+
+.api-key-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+/* ═══════════════════════════════════════════
+   Emergency Mode Overlay
+   ═══════════════════════════════════════════ */
+.emergency-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 56, 96, 0.95);
+  z-index: var(--z-emergency);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8);
+  animation: emergencyFlash 1s ease-in-out infinite alternate;
+}
+
+.emergency-overlay.active {
+  display: flex;
+}
+
+@keyframes emergencyFlash {
+  from { background: rgba(255, 56, 96, 0.90); }
+  to { background: rgba(255, 56, 96, 0.98); }
+}
+
+.emergency-icon {
+  font-size: 80px;
+  margin-bottom: var(--space-6);
+  animation: emergencyBounce 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes emergencyBounce {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+.emergency-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-bottom: var(--space-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.emergency-message {
+  font-size: var(--text-xl);
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: var(--space-8);
+}
+
+.emergency-routes {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.emergency-route-card {
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+  color: #FFFFFF;
+  text-align: center;
+}
+
+.emergency-dismiss {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #FFFFFF;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+}
+
+/* ═══════════════════════════════════════════
+   Chat Panel Header
+   ═══════════════════════════════════════════ */
+.chat-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.chat-panel-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+}
+
+.chat-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--text-lg);
+  padding: var(--space-1);
+}
+
+/* ═══════════════════════════════════════════
+   Rich Response Cards (inside chat)
+   ═══════════════════════════════════════════ */
+.response-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.response-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--info);
+  margin-bottom: var(--space-2);
+}
+
+.response-card-body {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.response-card-action {
+  margin-top: var(--space-3);
+}

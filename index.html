@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="FIFA 2026 Smart Stadium AI Operations Center">
+    <title>FIFA 2026 Smart Stadium AI Operations Center</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/views.css">
+  </head>
+  <body>
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
+    <div id="aria-live-region" class="aria-live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="app-shell" class="app-shell">
+      <aside class="app-sidebar" aria-label="Primary navigation">
+        <div class="sidebar-logo" aria-label="FIFA Smart Stadium">
+          <div class="sidebar-logo-icon" aria-hidden="true">26</div>
+          <div class="sidebar-logo-text">Smart Stadium</div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Operations views">
+          <button class="nav-item active" type="button" data-view="dashboard-view" aria-controls="dashboard-view">
+            <span class="nav-item-icon" aria-hidden="true">D</span>
+            <span class="nav-item-label">Dashboard</span>
+          </button>
+          <button class="nav-item" type="button" data-view="map-view" aria-controls="map-view">
+            <span class="nav-item-icon" aria-hidden="true">M</span>
+            <span class="nav-item-label">Stadium Map</span>
+          </button>
+          <button class="nav-item" type="button" data-view="incidents-view" aria-controls="incidents-view">
+            <span class="nav-item-icon" aria-hidden="true">!</span>
+            <span class="nav-item-label">Incidents</span>
+          </button>
+          <button class="nav-item" type="button" data-view="gates-view" aria-controls="gates-view">
+            <span class="nav-item-icon" aria-hidden="true">G</span>
+            <span class="nav-item-label">Gate Flow</span>
+          </button>
+          <button class="nav-item" type="button" data-view="queues-view" aria-controls="queues-view">
+            <span class="nav-item-icon" aria-hidden="true">Q</span>
+            <span class="nav-item-label">Queues</span>
+          </button>
+          <button class="nav-item" type="button" data-view="transit-view" aria-controls="transit-view">
+            <span class="nav-item-icon" aria-hidden="true">T</span>
+            <span class="nav-item-label">Transit</span>
+          </button>
+          <button class="nav-item" type="button" data-view="sustainability-view" aria-controls="sustainability-view">
+            <span class="nav-item-icon" aria-hidden="true">S</span>
+            <span class="nav-item-label">Sustainability</span>
+          </button>
+          <button class="nav-item" type="button" data-view="accessibility-view" aria-controls="accessibility-view">
+            <span class="nav-item-icon" aria-hidden="true">A</span>
+            <span class="nav-item-label">Accessibility</span>
+          </button>
+          <button class="nav-item" type="button" data-view="volunteers-view" aria-controls="volunteers-view">
+            <span class="nav-item-icon" aria-hidden="true">V</span>
+            <span class="nav-item-label">Volunteers</span>
+          </button>
+          <button class="nav-item" type="button" data-view="settings-view" aria-controls="settings-view">
+            <span class="nav-item-icon" aria-hidden="true">C</span>
+            <span class="nav-item-label">Settings</span>
+          </button>
+        </nav>
+
+        <div class="role-switcher" role="group" aria-labelledby="role-switcher-label">
+          <div id="role-switcher-label" class="nav-section-label">Role</div>
+          <button class="role-btn active" type="button" data-role="fan" aria-pressed="true">Fan</button>
+          <button class="role-btn" type="button" data-role="staff" aria-pressed="false">Staff</button>
+          <button class="role-btn" type="button" data-role="organizer" aria-pressed="false">Organizer</button>
+        </div>
+      </aside>
+
+      <header class="app-header" role="banner">
+        <div class="header-left">
+          <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-controls="app-shell">Menu</button>
+          <div id="match-clock" class="match-clock" aria-live="polite">00:00</div>
+        </div>
+        <div class="header-center">
+          <label class="sr-only" for="venue-selector">Venue</label>
+          <select id="venue-selector" class="venue-selector" name="venue">
+            <option value="metlife">MetLife Stadium</option>
+            <option value="sofi">SoFi Stadium</option>
+            <option value="azteca">Estadio Azteca</option>
+            <option value="att">AT&amp;T Stadium</option>
+            <option value="bmo">BMO Field</option>
+          </select>
+          <span id="role-banner" class="badge badge-info" aria-live="polite">Fan Mode</span>
+        </div>
+        <div class="header-right">
+          <button id="notification-button" class="notification-btn" type="button" aria-label="Show active notifications">
+            <span aria-hidden="true">Alert</span>
+            <span id="notification-badge" class="notification-badge"></span>
+          </button>
+          <button id="chat-toggle" class="btn btn-primary btn-sm" type="button" aria-expanded="false" aria-controls="chat-panel">AI Assistant</button>
+          <button id="settings-button" class="btn btn-ghost btn-icon" type="button" aria-label="Open settings" data-view-target="settings-view">Set</button>
+        </div>
+      </header>
+
+      <main id="main-content" class="app-main" role="main" tabindex="-1">
+        <section id="dashboard-view" class="view active" aria-labelledby="dashboard-title">
+          <div class="view-header">
+            <h1 id="dashboard-title" class="view-title">Operations Dashboard</h1>
+            <button id="refresh-dashboard" class="btn btn-ghost btn-sm" type="button">Refresh simulation</button>
+          </div>
+          <div id="dashboard-kpis" class="dashboard-kpis" aria-live="polite"></div>
+          <div class="dashboard-main">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">AI Decision Feed</h2>
+                <span id="decision-confidence" class="badge badge-info">Live</span>
+              </div>
+              <div id="decision-feed" class="incident-feed"></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Venue Snapshot</h2>
+              </div>
+              <div id="venue-snapshot"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="map-view" class="view" aria-labelledby="map-title">
+          <div class="view-header">
+            <h1 id="map-title" class="view-title">Stadium Crowd Map</h1>
+            <button id="reroute-crowd" class="btn btn-primary btn-sm" type="button">Run reroute plan</button>
+          </div>
+          <div class="grid-2">
+            <div id="stadium-map-container" class="map-container" aria-label="Interactive stadium density map">
+              <!-- stadium-map.js will inject the SVG from assets/stadium-map.svg here -->
+              <div class="map-legend" aria-label="Density legend">
+                <span class="legend-item"><span class="legend-swatch density-safe"></span> Safe</span>
+                <span class="legend-item"><span class="legend-swatch density-moderate"></span> Busy</span>
+                <span class="legend-item"><span class="legend-swatch density-crowded"></span> Amber</span>
+                <span class="legend-item"><span class="legend-swatch density-critical"></span> Red</span>
+              </div>
+            </div>
+            <div id="map-insights" class="incident-feed"></div>
+          </div>
+        </section>
+
+        <section id="incidents-view" class="view" aria-labelledby="incidents-title">
+          <div class="view-header">
+            <h1 id="incidents-title" class="view-title">Incident Command</h1>
+            <button id="create-incident" class="btn btn-danger btn-sm" type="button">Simulate incident</button>
+          </div>
+          <div class="incident-filters" role="group" aria-label="Incident filters">
+            <button class="filter-chip active" type="button" data-filter="all">All</button>
+            <button class="filter-chip" type="button" data-filter="green">Green</button>
+            <button class="filter-chip" type="button" data-filter="amber">Amber</button>
+            <button class="filter-chip" type="button" data-filter="red">Red</button>
+            <button class="filter-chip" type="button" data-filter="open">Open</button>
+          </div>
+          <div id="incident-grid" class="incident-feed" aria-live="polite"></div>
+        </section>
+
+        <section id="gates-view" class="view" aria-labelledby="gates-title">
+          <div class="view-header">
+            <h1 id="gates-title" class="view-title">Gate Flow Optimizer</h1>
+            <button id="optimize-gates" class="btn btn-primary btn-sm" type="button">Optimize gates</button>
+          </div>
+          <div id="gate-grid" class="grid-auto"></div>
+        </section>
+
+        <section id="queues-view" class="view" aria-labelledby="queues-title">
+          <div class="view-header">
+            <h1 id="queues-title" class="view-title">Queues & Services</h1>
+            <button id="predict-queues" class="btn btn-primary btn-sm" type="button">Predict waits</button>
+          </div>
+          <div id="queue-grid" class="queue-grid"></div>
+        </section>
+
+        <section id="transit-view" class="view" aria-labelledby="transit-title">
+          <div class="view-header">
+            <h1 id="transit-title" class="view-title">Transportation Hub</h1>
+            <button id="send-transit-alert" class="btn btn-ghost btn-sm" type="button">Send transit alert</button>
+          </div>
+          <div id="transit-grid" class="transit-grid"></div>
+        </section>
+
+        <section id="sustainability-view" class="view" aria-labelledby="sustainability-title">
+          <div class="view-header">
+            <h1 id="sustainability-title" class="view-title">Sustainability Panel</h1>
+            <button id="recalculate-sustainability" class="btn btn-primary btn-sm" type="button">Recalculate score</button>
+          </div>
+          <div class="grid-2">
+            <div class="card sustainability-score">
+              <div class="score-circle">
+                <span id="sustainability-score" class="score-value">0</span>
+                <span class="score-unit">score</span>
+              </div>
+            </div>
+            <div id="sustainability-breakdown" class="incident-feed"></div>
+          </div>
+        </section>
+
+        <section id="accessibility-view" class="view" aria-labelledby="accessibility-title">
+          <div class="view-header">
+            <h1 id="accessibility-title" class="view-title">Accessibility Center</h1>
+            <button id="plan-accessible-route" class="btn btn-primary btn-sm" type="button">Plan accessible route</button>
+          </div>
+          <div class="a11y-settings">
+            <div class="a11y-setting-card">
+              <div class="a11y-setting-info">
+                <span class="a11y-setting-name">High contrast</span>
+                <span class="a11y-setting-desc">Increase contrast for command-center visibility.</span>
+              </div>
+              <label class="toggle" for="high-contrast-toggle">
+                <input id="high-contrast-toggle" type="checkbox">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              </label>
+            </div>
+            <div class="a11y-setting-card">
+              <div class="a11y-setting-info">
+                <span class="a11y-setting-name">Large text</span>
+                <span class="a11y-setting-desc">Use larger operational text across the app.</span>
+              </div>
+              <label class="toggle" for="large-text-toggle">
+                <input id="large-text-toggle" type="checkbox">
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              </label>
+            </div>
+            <div id="accessible-route-card" class="card"></div>
+          </div>
+        </section>
+
+        <section id="volunteers-view" class="view" aria-labelledby="volunteers-title">
+          <div class="view-header">
+            <h1 id="volunteers-title" class="view-title">Volunteer Dispatch</h1>
+            <button id="recommend-staff" class="btn btn-primary btn-sm" type="button">Recommend deployment</button>
+          </div>
+          <div id="staff-deployment-grid" class="grid-auto"></div>
+        </section>
+
+        <section id="settings-view" class="view" aria-labelledby="settings-title">
+          <div class="view-header">
+            <h1 id="settings-title" class="view-title">Settings & API</h1>
+          </div>
+          <div class="settings-section">
+            <h2 class="settings-section-title">Gemini API</h2>
+            <label class="form-label" for="gemini-api-key">Gemini API key</label>
+            <div class="api-key-input">
+              <input id="gemini-api-key" class="form-input" type="password" autocomplete="off" spellcheck="false" placeholder="Stored locally in this browser">
+              <button id="save-api-key" class="btn btn-primary" type="button">Save</button>
+              <button id="clear-api-key" class="btn btn-ghost" type="button">Clear</button>
+            </div>
+            <div id="api-key-status" class="api-key-status" aria-live="polite">
+              <span class="status-dot warning"></span>
+              <span>Local fallback engine active.</span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h2 class="settings-section-title">Simulation Controls</h2>
+            <div class="grid-3">
+              <button id="simulate-crowd-surge" class="btn btn-ghost" type="button">Crowd surge</button>
+              <button id="simulate-gate-delay" class="btn btn-ghost" type="button">Gate delay</button>
+              <button id="simulate-clear-state" class="btn btn-success" type="button">Clear state</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside id="chat-panel" class="chat-panel" aria-label="AI assistant panel">
+        <div class="chat-panel-header">
+          <div class="chat-panel-title"><span aria-hidden="true">AI</span><span>Stadium Assistant</span></div>
+          <button id="chat-close" class="chat-panel-close" type="button" aria-label="Close chat panel">x</button>
+        </div>
+        <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="Assistant messages"></div>
+        <div id="quick-action-chips" class="chat-chips" aria-label="Quick actions"></div>
+        <form id="chat-form" class="chat-input-area" autocomplete="off">
+          <label class="sr-only" for="chat-input">Message the stadium assistant</label>
+          <input id="chat-input" class="chat-input" name="message" type="text" maxlength="500" placeholder="Ask for routes, queues, incidents, transit...">
+          <button id="voice-button" class="btn btn-ghost btn-icon" type="button" aria-label="Start voice input">Mic</button>
+          <button id="send-button" class="btn btn-primary btn-icon" type="submit" aria-label="Send message">Go</button>
+        </form>
+      </aside>
+
+      <nav class="mobile-bottom-nav" aria-label="Mobile primary navigation">
+        <button class="mobile-nav-item active" type="button" data-view="dashboard-view"><span class="mobile-nav-item-icon">D</span><span>Dash</span></button>
+        <button class="mobile-nav-item" type="button" data-view="map-view"><span class="mobile-nav-item-icon">M</span><span>Map</span></button>
+        <button class="mobile-nav-item" type="button" data-view="incidents-view"><span class="mobile-nav-item-icon">!</span><span>Ops</span></button>
+        <button class="mobile-nav-item" type="button" data-view="queues-view"><span class="mobile-nav-item-icon">Q</span><span>Queues</span></button>
+        <button class="mobile-nav-item" type="button" data-view="settings-view"><span class="mobile-nav-item-icon">C</span><span>More</span></button>
+      </nav>
+    </div>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+    <div id="emergency-overlay" class="emergency-overlay" role="dialog" aria-modal="true" aria-labelledby="emergency-title">
+      <button id="emergency-dismiss" class="emergency-dismiss" type="button">Dismiss drill</button>
+      <div class="emergency-icon" aria-hidden="true">!</div>
+      <h2 id="emergency-title" class="emergency-title">Emergency Route Active</h2>
+      <p id="emergency-message" class="emergency-message">Follow staff instructions and proceed to the highlighted exit route.</p>
+      <div id="emergency-routes" class="emergency-routes"></div>
+    </div>
+
+    <script src="js/utils.js" defer></script>
+    <script src="js/ai-engine.js" defer></script>
+    <script src="js/gemini-api.js" defer></script>
+    <script src="js/simulator.js" defer></script>
+    <script src="js/stadium-map.js" defer></script>
+    <script src="js/incidents.js" defer></script>
+    <script src="js/chat.js" defer></script>
+    <script src="js/dashboard.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

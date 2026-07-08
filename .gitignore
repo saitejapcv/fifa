@@ -1,0 +1,17 @@
+# Local IDE and System Files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Git state
+.git/
+
+# Credentials / Keys (Never commit these!)
+.env
+.env.local
+.env.*.local
+
+# Project management
+.agents/research/*.tmp
+data/stadiums.json.tmp

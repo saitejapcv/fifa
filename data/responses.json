@@ -1,0 +1,94 @@
+{
+  "seat_guides": {
+    "en": {
+      "lower_bowl": "Lower bowl seats (Sections 101-112) offer the closest view of the pitch. These sections are fully covered and wheelchair accessible.",
+      "upper_bowl": "Upper bowl seats (Sections 201-212) provide a panoramic view of the entire stadium. Elevator access is available at all gates.",
+      "premium": "Premium seating includes VIP lounges and private suites with dedicated concourse access and catering services.",
+      "wheelchair": "Wheelchair accessible seating is available in all sections with companion seating. Please contact accessibility services upon arrival.",
+      "family": "Family zones are located in Sections 104, 105, 111, and 112 with kid-friendly concessions and restrooms."
+    },
+    "es": {
+      "lower_bowl": "Los asientos de la planta baja (Secciones 101-112) ofrecen la vista más cercana del campo. Estas secciones están completamente cubiertas y son accesibles en silla de ruedas.",
+      "upper_bowl": "Los asientos de la planta alta (Secciones 201-212) proporcionan una vista panorámica de todo el estadio. Hay acceso por ascensor en todas las puertas.",
+      "premium": "Los asientos premium incluyen salones VIP y suites privadas con accesso concourse dedicado y servicios de catering.",
+      "wheelchair": "Los asientos accesibles en silla de ruedas están disponibles en todas las secciones con asientos de acompañante. Por favor, contacte a los servicios de accesibilidad a su llegada.",
+      "family": "Las zonas familiares están ubicadas en las Secciones 104, 105, 111 y 112 con concesiones y baños aptos para niños."
+    },
+    "fr": {
+      "lower_bowl": "Les sièges du rez-de-chaussée (Sections 101-112) offrent la vue la plus proche du terrain. Ces sections sont entièrement couvertes et accessibles en fauteuil roulant.",
+      "upper_bowl": "Les sièges de l'étage supérieur (Sections 201-212) offrent une vue panoramique de tout le stade. L'accès par ascenseur est disponible à toutes les portes.",
+      "premium": "Les sièges premium incluent des salons VIP et des suites privées avec accès couloir dédié et services de restauration.",
+      "wheelchair": "Les sièges accessibles en fauteuil roulant sont disponibles dans toutes les sections avec places d'accompagnateur. Veuillez contacter les services d'accessibilité à votre arrivée.",
+      "family": "Les zones familiales sont situées dans les Sections 104, 105, 111 et 112 avec des concesions et toilettes adaptées aux enfants."
+    }
+  },
+  "concession_menus": {
+    "en": {
+      "classic": "Classic Stadium Fare: Hot dogs, nachos, pretzels, and popcorn at all concession stands.",
+      "local": "Local Cuisine: Regional specialties including Texas BBQ (Arlington), Philly Cheesesteak (Philadelphia), and Tacos (Mexico City).",
+      "premium_dining": "Premium Dining: Full-service restaurants and bars located in the VIP concourse with reservations required.",
+      "healthy": "Healthy Options: salads, grilled chicken, and vegetarian/vegan options available at select stands.",
+      "beverages": "Beverages: Soft drinks, water, craft beer, and wine. ID required for alcohol purchases."
+    },
+    "es": {
+      "classic": "Comida Clásica del Estadio: Hot dogs, nachos, pretzels y palomitas en todos los puestos de concesiones.",
+      "local": "Cocina Local: Especialidades regionales incluyendo BBQ de Texas (Arlington), Philly Cheesesteak (Philadelphia), y Tacos (Ciudad de México).",
+      "premium_dining": "Comedor Premium: Restaurantes y bares de servicio completo ubicados en el concourse VIP con reservas requeridas.",
+      "healthy": "Opciones Saludables: ensaladas, pollo a la parrilla y opciones vegetarianas/veganas disponibles en puestos selectos.",
+      "beverages": "Bebidas: refrescos, agua, cerveza artesanal y vino. Se requiere identificación para compras de alcohol."
+    },
+    "fr": {
+      "classic": "Nourriture Classique du Stade: Hot dogs, nachos, bretzels et pop-corn à tous les stands de concessions.",
+      "local": "Cuisine Locale: Spécialités régionales incluant le BBQ du Texas (Arlington), le Philly Cheesesteak (Philadelphia), et les Tacos (Mexico City).",
+      "premium_dining": "Restauration Premium: Restaurants et bars de service complet situés dans le concourse VIP avec réservation obligatoire.",
+      "healthy": "Options Saines: salades, poulet grillé et options végétariens/végétaliens disponibles dans certains stands.",
+      "beverages": "Boissons: boissons gazeuses, eau, bière artisanale et vin. Une pièce d'identité est requise pour les achats d'alcool."
+    }
+  },
+  "transportation_status": {
+    "en": {
+      "rail_operational": "All rail services are operating on schedule with increased frequency post-match.",
+      "rail_delayed": "Rail services are experiencing delays due to high passenger volume. Expected wait: 15-30 minutes.",
+      "bus_operational": "Shuttle buses are running every 5 minutes from all gates to designated park-and-ride lots.",
+      "rideshare": "Rideshare pickup is located at Gate C. Surge pricing may apply. Estimated wait: 10-15 minutes.",
+      "parking": "General parking is at 85% capacity. VIP parking is 95% full. Follow signage to available spaces."
+    },
+    "es": {
+      "rail_operational": "Todos los servicios ferroviarios están operando según lo programado con frecuencia aumentada después del partido.",
+      "rail_delayed": "Los servicios ferroviarios están experimentando retrasos debido al alto volumen de pasajeros. Espera estimada: 15-30 minutos.",
+      "bus_operational": "Los autobuses lanzadera están corriendo cada 5 minutos desde todas las puertas hasta los lotes de estacionamiento designados.",
+      "rideshare": "La recogida de viajes compartidos está ubicada en la Puerta C. Puede aplicarse tarifa dinámica. Espera estimada: 10-15 minutos.",
+      "parking": "El estacionamiento general está al 85% de capacidad. El estacionamiento VIP está al 95% de capacidad. Siga la señalización a los espacios disponibles."
+    },
+    "fr": {
+      "rail_operational": "Tous les services ferroviaires fonctionnent selon l'horaire avec une fréquence accrue après le match.",
+      "rail_delayed": "Les services ferroviaires connaissent des retards en raison du volume élevé de passagers. Attente prévue: 15-30 minutes.",
+      "bus_operational": "Les navettes fonctionnent toutes les 5 minutes depuis toutes les portes vers les parcs de stationnement désignés.",
+      "rideshare": "Le point de rencontre de covoiturage est situé à la Porte C. Des tarifs de pointe peuvent s'appliquer. Attente estimée: 10-15 minutes.",
+      "parking": "Le stationnement général est à 85% de capacité. Le stationnement VIP est à 95% de capacité. Suivez la signalisation vers les places disponibles."
+    }
+  },
+  "emergency_instructions": {
+    "en": {
+      "fire": "In case of fire, remain calm and proceed to the nearest exit. Do not use elevators. Follow staff instructions.",
+      "medical": "For medical emergencies, contact the nearest steward or dial 911. First aid stations are located at Gates A, C, and E.",
+      "severe_weather": "In case of severe weather, seek shelter in the nearest concourse area. Avoid open spaces and metal structures.",
+      "evacuation": "When instructed to evacuate, proceed calmly to the nearest exit. Assist those with mobility challenges if safe to do so.",
+      "lost_child": "Report a lost child immediately to the nearest steward or at the Lost & Found center located at Gate B."
+    },
+    "es": {
+      "fire": "En caso de incendio, mantenga la calma y diríjase a la salida más cercana. No use ascensores. Siga las instrucciones del personal.",
+      "medical": "Para emergencias médicas, contacte al steward más cercano o marque 911. Las estaciones de primeros auxilios están ubicadas en las Puertas A, C y E.",
+      "severe_weather": "En caso de clima severo, busque refugio en el área de callejón más cercana. Evite espacios abiertos y estructuras metálicas.",
+      "evacuation": "Cuando se le indique evacuar, diríjase con calma a la salida más cercana. Asista a personas con families si es seguro hacerlo.",
+      "lost_child": "Reporte a un niño perdido inmediatamente al steward más cercano o en el centro de Objetos Perdid ubicado en la Puerta B."
+    },
+    "fr": {
+      "fire": "En cas d'incendie, restez calme et dirigez-vous vers la sortie la plus proche. N'utilisez pas les ascenseurs. Suivez les instructions du personnel.",
+      "medical": "Pour les urgences médicales, contactez le steward le plus proche ou composez le 911. Les postes de premiers secours sont situés aux Portes A, C et E.",
+      "severe_weather": "En cas de météo sévère, cherchez refuge dans le couloir le plus proche. Évitez les espaces ouverts et les structures métalliques.",
+      "evacuation": "Lorsqu'on vous demande d'évacuer, dirigez-vous calmement vers la sortie la plus proche. Aidez les personnes à mobilité réduite si c'est sûr.",
+      "lost_child": "Signalez un enfant perdu immédiatement au steward le plus proche ou au centre d'Objets Perdus situé à la Porte B."
+    }
+  }
+}

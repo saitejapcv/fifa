@@ -1,0 +1,832 @@
+{
+  "stadiums": [
+    {
+      "id": "att",
+      "name": "AT&T Stadium",
+      "city": "Arlington",
+      "country": "USA",
+      "capacity": 80000,
+      "expandable_capacity": 100000,
+      "lat": 32.7473,
+      "lng": -97.0945,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "DART Rail",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "metlife",
+      "name": "MetLife Stadium",
+      "city": "East Rutherford",
+      "country": "USA",
+      "capacity": 82500,
+      "expandable_capacity": 82500,
+      "lat": 40.8135,
+      "lng": -74.0745,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "NJ Transit Rail",
+        "Bus",
+        "Ferry",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "sofistadium",
+      "name": "SoFi Stadium",
+      "city": "Inglewood",
+      "country": "USA",
+      "capacity": 70000,
+      "expandable_capacity": 100000,
+      "lat": 33.9534,
+      "lng": -118.339,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "Metro Rail",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelcham seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "mercedes",
+      "name": "Mercedes-Benz Stadium",
+      "city": "Atlanta",
+      "country": "USA",
+      "capacity": 71000,
+      "expandable_capacity": 71000,
+      "lat": 33.7554,
+      "lng": -84.4009,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "MARTA Rail",
+        "Bus",
+        "Streetcar",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "tdec",
+      "name": "TDECU Stadium",
+      "city": "Houston",
+      "country": "USA",
+      "capacity": 72500,
+      "expandable_capacity": 72500,
+      "lat": 29.7604,
+      "lng": -95.3698,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "METRORail",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "hardrock",
+      "name": "Hard Rock Stadium",
+      "city": "Miami Gardens",
+      "country": "USA",
+      "capacity": 65000,
+      "expandable_capacity": 65000,
+      "lat": 25.958,
+      "lng": -80.2389,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "Tri-Rail",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "levis",
+      "name": "Levi's Stadium",
+      "city": "Santa Clara",
+      "country": "USA",
+      "capacity": 68500,
+      "expandable_capacity": 68500,
+      "lat": 37.4033,
+      "lng": -121.9693,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "VTA Light Rail",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "linc",
+      "name": "Lincoln Financial Field",
+      "city": "Philadelphia",
+      "country": "USA",
+      "capacity": 69596,
+      "expandable_capacity": 69596,
+      "lat": 39.9008,
+      "lng": -75.1675,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "SEPTA Broad Street Line",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "gillette",
+      "name": "Gillette Stadium",
+      "city": "Foxborough",
+      "country": "USA",
+      "capacity": 65878,
+      "expandable_capacity": 65878,
+      "lat": 42.0909,
+      "lng": -71.2643,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "MBTA Commuter Rail",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "azteca",
+      "name": "Estadio Azteca",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "capacity": 87523,
+      "expandable_capacity": 87523,
+      "lat": 19.3029,
+      "lng": -99.1505,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "Metro",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "bbva",
+      "name": "Estadio BBVA",
+      "city": "Monterrey",
+      "country": "Mexico",
+      "capacity": 53500,
+      "expandable_capacity": 53500,
+      "lat": 25.6692,
+      "lng": -100.244,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "Metro",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "akron",
+      "name": "Estadio Akron",
+      "city": "Zapopan",
+      "country": "Mexico",
+      "capacity": 49850,
+      "expandable_capacity": 49850,
+      "lat": 20.8225,
+      "lng": -103.3287,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "Mi Macro Periferico",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "bmo",
+      "name": "BMO Field",
+      "city": "Toronto",
+      "country": "Canada",
+      "capacity": 45000,
+      "expandable_capacity": 45000,
+      "lat": 43.6332,
+      "lng": -79.4023,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "TTC Streetcar",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    },
+    {
+      "id": "bcplace",
+      "name": "BC Place",
+      "city": "Vancouver",
+      "country": "Canada",
+      "capacity": 54500,
+      "expandable_capacity": 54500,
+      "lat": 49.2768,
+      "lng": -123.1134,
+      "sectors": {
+        "lower": [
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112
+        ],
+        "upper": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212
+        ]
+      },
+      "gates": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "transit": [
+        "SkyTrain",
+        "Bus",
+        "Rideshare"
+      ],
+      "accessibility": [
+        "Wheelchair seating",
+        "Companion seating",
+        "Assistive listening",
+        "Sensory room"
+      ]
+    }
+  ]
+}

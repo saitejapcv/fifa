@@ -1,0 +1,147 @@
+/* ============================================
+   FIFA 2026 Smart Stadium — Design Tokens
+   ============================================ */
+
+:root {
+  /* ── Background Surfaces ── */
+  --bg-primary: #0B0F19;
+  --bg-surface: #151B26;
+  --bg-card: #1E2734;
+  --bg-card-hover: #29384D;
+  --bg-elevated: #2A3444;
+
+  /* ── Text ── */
+  --text-primary: #E2E8F0;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-inverse: #0B0F19;
+
+  /* ── Accent — Status ── */
+  --success: #00FF87;
+  --success-dim: #059669;
+  --info: #00F0FF;
+  --info-dim: #0284C7;
+  --warning: #FFB300;
+  --warning-dim: #D97706;
+  --danger: #FF3860;
+  --danger-dim: #DC2626;
+
+  /* ── FIFA Brand ── */
+  --gold: #FFD700;
+  --gold-dim: #B8960F;
+  --field-green: #00A651;
+
+  /* ── Borders ── */
+  --border-subtle: #2D3A4D;
+  --border-medium: #3D4F66;
+  --border-focus: #00F0FF;
+
+  /* ── Glassmorphism ── */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-hover: rgba(255, 255, 255, 0.07);
+  --glass-blur: blur(12px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow-success: 0 0 20px rgba(0, 255, 135, 0.15);
+  --shadow-glow-danger: 0 0 20px rgba(255, 56, 96, 0.2);
+  --shadow-glow-info: 0 0 20px rgba(0, 240, 255, 0.15);
+
+  /* ── Typography ── */
+  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Font Sizes ── */
+  --text-xs: 0.625rem;   /* 10px — labels, badges */
+  --text-sm: 0.75rem;    /* 12px — captions, timestamps */
+  --text-base: 0.875rem; /* 14px — body text */
+  --text-md: 1rem;       /* 16px — emphasized body */
+  --text-lg: 1.125rem;   /* 18px — card titles */
+  --text-xl: 1.5rem;     /* 24px — section headers */
+  --text-2xl: 2rem;      /* 32px — page titles */
+  --text-3xl: 2.5rem;    /* 40px — hero KPI numbers */
+
+  /* ── Font Weights ── */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Spacing (4px base) ── */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* ── Border Radius ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* ── Transitions ── */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-Index Scale ── */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-sidebar: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-emergency: 900;
+
+  /* ── Sidebar Dimensions ── */
+  --sidebar-width: 240px;
+  --sidebar-collapsed: 64px;
+  --header-height: 60px;
+  --chat-panel-width: 380px;
+
+  /* ── Heatmap Colors (colorblind-safe) ── */
+  --heatmap-safe: #2563EB;
+  --heatmap-moderate: #F59E0B;
+  --heatmap-crowded: #EF4444;
+  --heatmap-critical: #991B1B;
+}
+
+/* ── High Contrast Mode Override ── */
+body.high-contrast {
+  --bg-primary: #000000;
+  --bg-surface: #1A1A1A;
+  --bg-card: #2A2A2A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #CCCCCC;
+  --border-subtle: #555555;
+  --border-focus: #FFFF00;
+  --success: #00FF00;
+  --warning: #FFFF00;
+  --danger: #FF0000;
+  --info: #00FFFF;
+}
+
+/* ── Large Text Mode Override ── */
+body.large-text {
+  --text-xs: 0.875rem;
+  --text-sm: 1rem;
+  --text-base: 1.125rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.5rem;
+  --text-xl: 2rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: 3rem;
+}
