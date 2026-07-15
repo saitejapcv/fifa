@@ -300,4 +300,23 @@
 - **Validation Result**: ✅ PASS
 - **Chain-Prompt Iterations**: 0
 
+---
+
+### Task T-018: Secure config.js Configuration & UI Setting Lock
+- **Status**: `[/]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Claude Opus 4.6 (Thinking)
+- **Priority**: High
+- **Description**: Exclude config.js from git, create config.template.js, update HTML loader, update Gemini/Football API clients to check config parameters, and add settings panel lock states.
+- **Deliverable**: `.gitignore`, `index.html`, `js/config.template.js`, `js/gemini-api.js`, `js/football-api.js`, `js/dashboard.js`
+- **Acceptance Criteria**:
+  - [ ] js/config.js is added to `.gitignore`.
+  - [ ] js/config.template.js created.
+  - [ ] index.html loads config.js with fallback handler.
+  - [ ] API clients check window.StadiumConfig.
+  - [ ] UI locks settings form inputs when config values exist.
+- **Validation Result**: In Progress
+- **Chain-Prompt Iterations**: 0
+
+
 

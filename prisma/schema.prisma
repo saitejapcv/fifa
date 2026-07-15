@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Stadium {
+  id                  String     @id
+  name                String
+  city                String
+  country             String
+  capacity            Int
+  expandableCapacity  Int
+  lat                 Float
+  lng                 Float
+  gates               String
+  transit             String
+  accessibility       String
+  sectorsLower        String
+  sectorsUpper        String
+  matchLabel          String     @default("")
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  incidents           Incident[]
+}
+
+model Incident {
+  id                String   @id @default(cuid())
+  externalId        String?
+  type              String
+  location          String
+  crowdDensity      Float    @default(3)
+  minutesToKickoff  Int      @default(45)
+  status            String   @default("open")
+  severity          String?
+  action            String?
+  stadiumId         String?
+  stadium           Stadium? @relation(fields: [stadiumId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model DecisionLog {
+  id         String   @id @default(cuid())
+  title      String
+  body       String
+  severity   String   @default("info")
+  confidence Float?
+  role       String?
+  createdAt  DateTime @default(now())
+}

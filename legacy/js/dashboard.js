@@ -707,21 +707,64 @@
     if (venueSelector) venueSelector.value = state.venueId;
     if (roleBanner) roleBanner.textContent = `${state.role[0].toUpperCase()}${state.role.slice(1)} Mode`;
     if (badge) badge.hidden = state.incidents.every((incident) => incident.status === 'resolved');
+    
+    // Gemini Settings Locking
+    const geminiInput = $('#gemini-api-key');
+    const saveGemini = $('#save-api-key');
+    const clearGemini = $('#clear-api-key');
     const apiStatus = $('#api-key-status');
+    
+    const isGeminiAdminLocked = !!window.StadiumConfig?.geminiApiKey;
+    if (geminiInput) {
+      geminiInput.disabled = isGeminiAdminLocked;
+      if (isGeminiAdminLocked) {
+        geminiInput.value = '••••••••••••••••';
+        if (saveGemini) saveGemini.style.display = 'none';
+        if (clearGemini) clearGemini.style.display = 'none';
+      } else {
+        if (saveGemini) saveGemini.style.display = 'inline-block';
+        if (clearGemini) clearGemini.style.display = 'inline-block';
+      }
+    }
+    
     if (apiStatus) {
       apiStatus.replaceChildren();
-      const dot = create('span', `status-dot ${window.GeminiClient?.hasApiKey() ? 'success' : 'warning'}`);
+      const isConfigured = isGeminiAdminLocked || window.GeminiClient?.hasApiKey();
+      const dot = create('span', `status-dot ${isConfigured ? 'success' : 'warning'}`);
       const text = create('span');
-      text.textContent = window.GeminiClient?.hasApiKey() ? 'Gemini API key saved locally.' : 'Local fallback engine active.';
+      text.textContent = isGeminiAdminLocked 
+        ? '🔒 Active (Admin Configuration Locked)'
+        : (window.GeminiClient?.hasApiKey() ? 'Gemini API key saved locally.' : 'Local fallback engine active.');
       apiStatus.append(dot, text);
     }
     
+    // Football Settings Locking
+    const footballInput = $('#football-api-key');
+    const saveFootball = $('#save-football-key');
+    const clearFootball = $('#clear-football-key');
     const footballStatus = $('#football-key-status');
+    
+    const isFootballAdminLocked = !!window.StadiumConfig?.footballApiKey;
+    if (footballInput) {
+      footballInput.disabled = isFootballAdminLocked;
+      if (isFootballAdminLocked) {
+        footballInput.value = '••••••••••••••••';
+        if (saveFootball) saveFootball.style.display = 'none';
+        if (clearFootball) clearFootball.style.display = 'none';
+      } else {
+        if (saveFootball) saveFootball.style.display = 'inline-block';
+        if (clearFootball) clearFootball.style.display = 'inline-block';
+      }
+    }
+    
     if (footballStatus) {
       footballStatus.replaceChildren();
-      const dot = create('span', `status-dot ${window.FootballClient?.hasApiKey() ? 'success' : 'warning'}`);
+      const isConfigured = isFootballAdminLocked || window.FootballClient?.hasApiKey();
+      const dot = create('span', `status-dot ${isConfigured ? 'success' : 'warning'}`);
       const text = create('span');
-      text.textContent = window.FootballClient?.hasApiKey() ? 'Live Football API active.' : 'Mock data active.';
+      text.textContent = isFootballAdminLocked 
+        ? '🔒 Active (Admin Configuration Locked)'
+        : (window.FootballClient?.hasApiKey() ? 'Live Football API active.' : 'Mock data active.');
       footballStatus.append(dot, text);
     }
   };

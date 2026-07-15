@@ -13,7 +13,9 @@
     "'": '&#39;'
   })[char]).trim();
 
-  const getApiKey = () => localStorage.getItem(API_KEY_STORAGE_KEY) || '';
+  const getApiKey = () => {
+    return window.StadiumConfig?.geminiApiKey || localStorage.getItem(API_KEY_STORAGE_KEY) || '';
+  };
 
   const buildSystemInstruction = (context = {}) => {
     const densitySummary = (context.sectors || [])

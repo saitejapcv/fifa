@@ -8,7 +8,9 @@
 
   const FOOTBALL_KEY_STORAGE_KEY = 'fifa2026.footballApiKey';
 
-  const getApiKey = () => localStorage.getItem(FOOTBALL_KEY_STORAGE_KEY) || '';
+  const getApiKey = () => {
+    return window.StadiumConfig?.footballApiKey || localStorage.getItem(FOOTBALL_KEY_STORAGE_KEY) || '';
+  };
 
   const FootballClient = {
     keyName: FOOTBALL_KEY_STORAGE_KEY,
