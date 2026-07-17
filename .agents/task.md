@@ -392,5 +392,20 @@
 - **Validation Result**: ✅ PASS
 - **Chain-Prompt Iterations**: 0
 
+---
+
+### Task T-024: Implement Vercel CI/CD via GitHub Integration
+- **Status**: `[x]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Priority**: High
+- **Description**: Stage, commit, and push all database and server modifications to the remote GitHub repository. Instruct user on connecting their GitHub account on Vercel Dashboard to enable native push-to-deploy CI/CD.
+- **Deliverable**: Remote GitHub repository push, Vercel-GitHub connection steps
+- **Acceptance Criteria**:
+  - [x] Push local commits to remote GitHub repository.
+  - [x] Document step-by-step instructions for Vercel-GitHub connection.
+- **Validation Result**: ✅ PASS
+- **Chain-Prompt Iterations**: 0
+
 
 

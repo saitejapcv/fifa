@@ -179,4 +179,11 @@ Each entry follows this structure:
 - **Details**: Switched database datasource provider in `prisma/schema.prisma` to `"postgresql"`. Connected and synchronized local `.env` with the user's free Neon PostgreSQL instance. Ran schema push and seeded the remote database with 14 tournament stadiums. Logged in and linked the local directory to Vercel project, configured production/preview environment variables, and successfully deployed to Vercel production.
 - **Files Affected**: `prisma/schema.prisma`, `.env`, Vercel Deployment, `.agents/task.md`, `.agents/orchestration_log.md`
 
+### [2026-07-17 18:45] T-024 — Implement Vercel CI/CD via GitHub Integration
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Action**: Completed & Self-Validated
+- **Details**: Staged and committed all workspace updates. Pushed commits to GitHub remote origin branch `main`. Configured step-by-step instructions for native Vercel-GitHub connection to enable automatic builds and deployments on push.
+- **Files Affected**: GitHub repository, Vercel Dashboard connection, `.agents/task.md`, `.agents/orchestration_log.md`
+
 

@@ -45,8 +45,8 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
       )}
     >
       <div className="flex h-16 items-center gap-3 border-b border-claude-border px-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-claude-accent font-serif text-sm font-semibold text-white">
-          26
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-claude-surface">
+          <img src="/logo.png" alt="FIFA 26 Logo" className="h-full w-full object-contain p-0.5" />
         </div>
         {!collapsed && (
           <motion.div

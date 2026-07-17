@@ -77,8 +77,8 @@ export function LoginPage() {
       <div className="relative w-full max-w-lg space-y-6">
         {/* Brand header */}
         <div className="text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-claude-accent font-serif text-2xl font-bold text-white shadow-soft">
-            26
+          <div className="mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-claude-surface shadow-soft">
+            <img src="/logo.png" alt="FIFA 26 Logo" className="h-full w-full object-contain p-1" />
           </div>
           <h2 className="mt-4 font-serif text-3xl font-bold tracking-tight text-claude-ink sm:text-4xl">
             FIFA World Cup 2026™
