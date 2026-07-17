@@ -10,6 +10,15 @@ import {
 import { useApp } from "@/context/app-context";
 import { Button, Card, Input, Label, ViewHeader } from "../ui";
 
+type WorldCupGame = {
+  id: string;
+  home_team_name_en?: string;
+  away_team_name_en?: string;
+  local_date?: string;
+};
+
+const API_KEY_MASK = "••••••••••••••••••••";
+
 export function SettingsView() {
   const {
     state,
@@ -25,8 +34,8 @@ export function SettingsView() {
     addTicket,
     deleteTicket,
   } = useApp();
-  const [key, setKey] = useState("");
-  const [hasKey, setHasKey] = useState(false);
+  const [hasKey, setHasKey] = useState(() => Boolean(getStoredGeminiKey()));
+  const [key, setKey] = useState(() => (getStoredGeminiKey() ? API_KEY_MASK : ""));
 
   // Organizer settings state
   const [newOrgPass, setNewOrgPass] = useState("");
@@ -34,12 +43,6 @@ export function SettingsView() {
   const [newStaffPass, setNewStaffPass] = useState("");
   const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
   const [editingStaffPass, setEditingStaffPass] = useState("");
-
-  useEffect(() => {
-    const stored = getStoredGeminiKey();
-    setHasKey(Boolean(stored));
-    if (stored) setKey("••••••••••••••••••••");
-  }, []);
 
   const save = () => {
     try {
@@ -49,7 +52,7 @@ export function SettingsView() {
       }
       saveGeminiKey(key);
       setHasKey(true);
-      setKey("••••••••••••••••••••");
+      setKey(API_KEY_MASK);
       pushToast("API key saved", "Gemini is ready. Keys stay in this browser only.", "success");
     } catch (e) {
       pushToast("Invalid key", e instanceof Error ? e.message : "Try again", "danger");
@@ -96,7 +99,7 @@ export function SettingsView() {
     }
   };
 
-    const [games, setGames] = useState<any[]>([]);
+    const [games, setGames] = useState<WorldCupGame[]>([]);
 
     // Ticket states
     const [ticketNo, setTicketNo] = useState("");
@@ -122,7 +125,7 @@ export function SettingsView() {
         setIsParsing(true);
         pushToast("GenAI Processing", "Analyzing roster file structure...", "info");
         try {
-          const parsed = await parseRosterData(text, stadiums, games);
+          const parsed = await parseRosterData(text, stadiums);
           let ticketsAddedCount = 0;
           let staffAddedCount = 0;
 
@@ -183,7 +186,9 @@ export function SettingsView() {
           const res = await fetch("/api/worldcup?endpoint=games");
           if (res.ok) {
             const data = await res.json();
-            setGames(data.games || []);
+            const loadedGames = Array.isArray(data.games) ? data.games as WorldCupGame[] : [];
+            setGames(loadedGames);
+            setSelMatch((current) => current || loadedGames[0]?.id || "");
           }
         } catch (e) {
           console.error("Failed to load games in SettingsView:", e);
@@ -191,19 +196,6 @@ export function SettingsView() {
       }
       fetchGames();
     }, []);
-
-    // Set form defaults when games/stadiums load
-    useEffect(() => {
-      if (stadiums.length > 0 && !selStadium) {
-        setSelStadium(stadiums[0].id);
-      }
-    }, [stadiums, selStadium]);
-
-    useEffect(() => {
-      if (games.length > 0 && !selMatch) {
-        setSelMatch(games[0].id);
-      }
-    }, [games, selMatch]);
 
     const handleRegisterTicket = () => {
       if (!ticketNo.trim()) {
@@ -215,12 +207,12 @@ export function SettingsView() {
       const matchLabel = matchObj
         ? `${matchObj.home_team_name_en} vs. ${matchObj.away_team_name_en}`
         : "Tournament Match";
-      const matchDate = matchObj ? matchObj.local_date.split(" ")[0] : "06/15/2026";
+      const matchDate = matchObj?.local_date?.split(" ")[0] || "06/15/2026";
 
       const newTicket = {
         ticketNo: ticketNo.trim().toUpperCase(),
         matchId: selMatch,
-        stadiumId: selStadium,
+        stadiumId: selStadium || stadiums[0]?.id || "",
         section: selSection,
         seatNo: seatNo.trim(),
         assignedGate: selGate,
@@ -656,4 +648,3 @@ export function SettingsView() {
       </div>
     );
   }
-

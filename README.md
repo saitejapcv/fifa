@@ -48,6 +48,10 @@ Settings → paste a Gemini API key. Stored in `localStorage` only. Without a ke
 |---------|-------------|
 | `npm run dev` | Development server |
 | `npm run build` | Production build |
+| `npm run test` | Deterministic operations-engine and simulator tests |
+| `npm run test:e2e` | Playwright end-to-end tests in Chromium |
+| `npm run verify` | Type-check and run tests before a submission |
+| `npm run verify:full` | Run unit, type, and end-to-end validation |
 | `npm run start` | Start production server |
 | `npm run db:setup` | Create DB + seed stadiums |
 | `npm run db:seed` | Re-seed data |

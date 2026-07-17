@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useApp } from "@/context/app-context";
-import type { Role, ViewId } from "@/lib/types";
+import type { ViewId } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const nav: { id: ViewId; label: string; short: string }[] = [
@@ -19,8 +19,6 @@ const nav: { id: ViewId; label: string; short: string }[] = [
   { id: "translate", label: "Translator", short: "🌐" },
   { id: "settings", label: "Settings", short: "·" },
 ];
-
-const roles: Role[] = ["fan", "staff", "organizer", "volunteer"];
 
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const { state, setView, currentUser, logout } = useApp();

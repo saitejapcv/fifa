@@ -1,6 +1,31 @@
 import { StadiumAI } from "./ai-engine";
 import type { AIResponse, AppState } from "./types";
 
+type WorldCupGame = {
+  id?: string | number;
+  stadium_id?: string | number;
+  home_team_name_en?: string;
+  home_team_label?: string;
+  away_team_name_en?: string;
+  away_team_label?: string;
+  finished?: string;
+  home_score?: string | number;
+  away_score?: string | number;
+  local_date?: string;
+  type?: string;
+};
+
+type WorldCupStadium = {
+  id?: string | number;
+  fifa_name?: string;
+  name_en?: string;
+};
+
+type ImportedRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is ImportedRecord =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
 const MODEL = "gemma-4";
 const RESOLVED_MODEL = MODEL === "gemma-4" ? "gemma-4-26b-a4b-it" : MODEL;
 const IS_GEMMA = RESOLVED_MODEL.startsWith("gemma-4");
@@ -37,9 +62,9 @@ export function clearGeminiKey() {
   localStorage.removeItem("fifa2026.geminiApiKey");
 }
 
-let cachedGames: any[] | null = null;
-let cachedStadiums: any[] | null = null;
-let cachedTeams: any[] | null = null;
+let cachedGames: WorldCupGame[] | null = null;
+let cachedStadiums: WorldCupStadium[] | null = null;
+let cachedTeams: unknown[] | null = null;
 
 async function fetchWorldCupData() {
   if (cachedGames && cachedStadiums && cachedTeams) {
@@ -54,9 +79,12 @@ async function fetchWorldCupData() {
         fetch("/api/worldcup?endpoint=teams").then((r) => (r.ok ? r.json() : null)),
       ]);
 
-      if (gamesRes?.games) cachedGames = gamesRes.games;
-      if (stadiumsRes?.stadiums) cachedStadiums = stadiumsRes.stadiums;
-      if (teamsRes?.teams) cachedTeams = teamsRes.teams;
+      const gamesData = gamesRes as { games?: unknown } | null;
+      const stadiumsData = stadiumsRes as { stadiums?: unknown } | null;
+      const teamsData = teamsRes as { teams?: unknown } | null;
+      if (Array.isArray(gamesData?.games)) cachedGames = gamesData.games as WorldCupGame[];
+      if (Array.isArray(stadiumsData?.stadiums)) cachedStadiums = stadiumsData.stadiums as WorldCupStadium[];
+      if (Array.isArray(teamsData?.teams)) cachedTeams = teamsData.teams;
     }
   } catch (e) {
     console.error("Error fetching World Cup database:", e);
@@ -94,8 +122,8 @@ export async function askAssistant(
   try {
     const { games, stadiums } = await fetchWorldCupData();
     const gamesContext = games.length > 0
-      ? `World Cup 2026 Match Schedule and Locations:\n` + games.map((g: any) => {
-          const stadium = stadiums.find((s: any) => String(s.id) === String(g.stadium_id));
+      ? `World Cup 2026 Match Schedule and Locations:\n` + games.map((g) => {
+          const stadium = stadiums.find((s) => String(s.id) === String(g.stadium_id));
           const stadiumName = stadium ? stadium.fifa_name || stadium.name_en : `Stadium ${g.stadium_id}`;
           const home = g.home_team_name_en || g.home_team_label || "TBD";
           const away = g.away_team_name_en || g.away_team_label || "TBD";
@@ -190,20 +218,19 @@ export async function askAssistant(
 
 export async function parseRosterData(
   fileContent: string,
-  stadiumsList: { id: string; name: string }[] = [],
-  gamesList: { id: string; label: string }[] = []
+  stadiumsList: { id: string; name: string }[] = []
 ): Promise<{
-  tickets: any[];
-  staff: any[];
+  tickets: ImportedRecord[];
+  staff: ImportedRecord[];
 }> {
   // 1. Try local JSON parser first
-  let localParsed: { tickets: any[]; staff: any[] } | null = null;
+  let localParsed: { tickets: ImportedRecord[]; staff: ImportedRecord[] } | null = null;
   try {
-    const raw = JSON.parse(fileContent);
-    if (raw && (raw.tickets || raw.staff)) {
+    const raw: unknown = JSON.parse(fileContent);
+    if (isRecord(raw) && (raw.tickets || raw.staff)) {
       localParsed = {
-        tickets: Array.isArray(raw.tickets) ? raw.tickets : [],
-        staff: Array.isArray(raw.staff) ? raw.staff : [],
+        tickets: Array.isArray(raw.tickets) ? raw.tickets.filter(isRecord) : [],
+        staff: Array.isArray(raw.staff) ? raw.staff.filter(isRecord) : [],
       };
     }
   } catch {}
@@ -276,10 +303,10 @@ export async function parseRosterData(
 
     if (text) {
       const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleanText);
+      const parsed: unknown = JSON.parse(cleanText);
       return {
-        tickets: Array.isArray(parsed.tickets) ? parsed.tickets : [],
-        staff: Array.isArray(parsed.staff) ? parsed.staff : [],
+        tickets: isRecord(parsed) && Array.isArray(parsed.tickets) ? parsed.tickets.filter(isRecord) : [],
+        staff: isRecord(parsed) && Array.isArray(parsed.staff) ? parsed.staff.filter(isRecord) : [],
       };
     }
   } catch (e) {
@@ -287,8 +314,8 @@ export async function parseRosterData(
   }
 
   // 3. Fallback CSV Line-by-Line Parser
-  const tickets: any[] = [];
-  const staff: any[] = [];
+  const tickets: ImportedRecord[] = [];
+  const staff: ImportedRecord[] = [];
   try {
     const lines = fileContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     lines.forEach((line) => {
@@ -497,4 +524,3 @@ export async function translateAudio(
 
   return { transcript: "", translation: "" };
 }
-

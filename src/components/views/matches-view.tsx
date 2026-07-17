@@ -74,15 +74,17 @@ export function MatchesView() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function loadData() {
       try {
         setLoading(true);
         setError(null);
 
         const [teamsRes, groupsRes, gamesRes] = await Promise.all([
-          fetch("/api/worldcup?endpoint=teams"),
-          fetch("/api/worldcup?endpoint=groups"),
-          fetch("/api/worldcup?endpoint=games"),
+          fetch("/api/worldcup?endpoint=teams", { signal: controller.signal }),
+          fetch("/api/worldcup?endpoint=groups", { signal: controller.signal }),
+          fetch("/api/worldcup?endpoint=games", { signal: controller.signal }),
         ]);
 
         if (!teamsRes.ok || !groupsRes.ok || !gamesRes.ok) {
@@ -97,6 +99,7 @@ export function MatchesView() {
         setGroups(groupsDataJson.groups || []);
         setGames(gamesDataJson.games || []);
       } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         console.error("Error loading World Cup data:", err);
         setError(err instanceof Error ? err.message : "Failed to load tournament data.");
       } finally {
@@ -104,6 +107,7 @@ export function MatchesView() {
       }
     }
     loadData();
+    return () => controller.abort();
   }, []);
 
   // Helper: Look up team info by API ID
@@ -268,13 +272,13 @@ export function MatchesView() {
                             <span className="h-2 w-2 rounded-full bg-claude-accent animate-ping" />
                             Live • Group {match.group || "Knockout"}
                           </span>
-                          <Badge tone="info" className="font-semibold">{match.time_elapsed}'</Badge>
+                          <Badge tone="info" className="font-semibold">{match.time_elapsed}&apos;</Badge>
                         </div>
 
                         <div className="my-6 grid grid-cols-7 items-center text-center">
                           <div className="col-span-2 flex flex-col items-center">
                             {home?.flagUrl ? (
-                              <img src={home.flagUrl} alt="" className="h-10 w-14 object-cover rounded shadow-sm border mb-2" />
+                              <img src={home.flagUrl} alt={`${home.name} Flag`} className="h-10 w-14 object-cover rounded shadow-sm border mb-2" />
                             ) : (
                               <span className="text-4xl mb-2">🏳️</span>
                             )}
@@ -291,7 +295,7 @@ export function MatchesView() {
 
                           <div className="col-span-2 flex flex-col items-center">
                             {away?.flagUrl ? (
-                              <img src={away.flagUrl} alt="" className="h-10 w-14 object-cover rounded shadow-sm border mb-2" />
+                              <img src={away.flagUrl} alt={`${away.name} Flag`} className="h-10 w-14 object-cover rounded shadow-sm border mb-2" />
                             ) : (
                               <span className="text-4xl mb-2">🏳️</span>
                             )}
@@ -349,7 +353,7 @@ export function MatchesView() {
                           <div className="my-4 grid grid-cols-7 items-center text-center">
                             <div className="col-span-2 flex flex-col items-center">
                               {home?.flagUrl ? (
-                                <img src={home.flagUrl} alt="" className="h-8 w-11 object-cover rounded shadow-sm border mb-1.5" />
+                                <img src={home.flagUrl} alt={`${home.name} Flag`} className="h-8 w-11 object-cover rounded shadow-sm border mb-1.5" />
                               ) : (
                                 <span className="text-3xl mb-1.5">🏳️</span>
                               )}
@@ -365,7 +369,7 @@ export function MatchesView() {
 
                             <div className="col-span-2 flex flex-col items-center">
                               {away?.flagUrl ? (
-                                <img src={away.flagUrl} alt="" className="h-8 w-11 object-cover rounded shadow-sm border mb-1.5" />
+                                <img src={away.flagUrl} alt={`${away.name} Flag`} className="h-8 w-11 object-cover rounded shadow-sm border mb-1.5" />
                               ) : (
                                 <span className="text-3xl mb-1.5">🏳️</span>
                               )}
@@ -455,7 +459,7 @@ export function MatchesView() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 w-5/12">
                             {home?.flagUrl ? (
-                              <img src={home.flagUrl} alt="" className="h-6 w-9 object-cover rounded shadow-sm border" />
+                              <img src={home.flagUrl} alt={`${home?.name || match.home_team_name_en} Flag`} className="h-6 w-9 object-cover rounded shadow-sm border" />
                             ) : (
                               <span className="text-xl">🏳️</span>
                             )}
@@ -475,7 +479,7 @@ export function MatchesView() {
                           <div className="flex items-center justify-end gap-3 w-5/12 text-right">
                             <span className="font-serif text-sm font-bold text-claude-ink truncate">{away?.name || match.away_team_name_en}</span>
                             {away?.flagUrl ? (
-                              <img src={away.flagUrl} alt="" className="h-6 w-9 object-cover rounded shadow-sm border" />
+                              <img src={away.flagUrl} alt={`${away?.name || match.away_team_name_en} Flag`} className="h-6 w-9 object-cover rounded shadow-sm border" />
                             ) : (
                               <span className="text-xl">🏳️</span>
                             )}
@@ -558,7 +562,7 @@ export function MatchesView() {
                                 <td className="py-2.5 pr-2 font-medium text-claude-ink flex items-center gap-2">
                                   <span className="text-[10px] text-claude-ink-muted w-3 font-semibold text-center">{index + 1}</span>
                                   {details?.flagUrl ? (
-                                    <img src={details.flagUrl} alt="" className="h-4 w-6 object-cover rounded border shadow-sm" />
+                                    <img src={details.flagUrl} alt={`${details?.name || "Country"} Flag`} className="h-4 w-6 object-cover rounded border shadow-sm" />
                                   ) : (
                                     <span className="text-lg">🏳️</span>
                                   )}
@@ -605,7 +609,7 @@ export function MatchesView() {
 
                         <div className="flex items-center gap-3 border-b border-claude-border pb-4 mb-4">
                           {selectedApiTeam.flag ? (
-                            <img src={selectedApiTeam.flag} alt="" className="h-8 w-12 object-cover rounded shadow border" />
+                            <img src={selectedApiTeam.flag} alt={`${selectedApiTeam.name_en} Flag`} className="h-8 w-12 object-cover rounded shadow border" />
                           ) : (
                             <span className="text-4xl select-none">🏳️</span>
                           )}
@@ -709,7 +713,7 @@ export function MatchesView() {
                               <div className="flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-1.5 truncate max-w-[150px]">
                                   {home?.flagUrl ? (
-                                    <img src={home.flagUrl} alt="" className="h-3 w-4.5 object-cover rounded border" />
+                                    <img src={home.flagUrl} alt={`${homeName} Flag`} className="h-3 w-4.5 object-cover rounded border" />
                                   ) : (
                                     <span>🏳️</span>
                                   )}
@@ -728,7 +732,7 @@ export function MatchesView() {
                               <div className="flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-1.5 truncate max-w-[150px]">
                                   {away?.flagUrl ? (
-                                    <img src={away.flagUrl} alt="" className="h-3 w-4.5 object-cover rounded border" />
+                                    <img src={away.flagUrl} alt={`${awayName} Flag`} className="h-3 w-4.5 object-cover rounded border" />
                                   ) : (
                                     <span>🏳️</span>
                                   )}

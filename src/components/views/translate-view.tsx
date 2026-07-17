@@ -5,6 +5,31 @@ import { useApp } from "@/context/app-context";
 import { translateText, translateAudio } from "@/lib/gemini";
 import { Badge, Button, Card, ViewHeader, Select } from "../ui";
 
+type SpeechRecognitionResultEvent = {
+  results: ArrayLike<ArrayLike<{ transcript: string }>>;
+};
+
+type SpeechRecognitionErrorEvent = { error?: string };
+
+type SpeechRecognitionInstance = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionResultEvent) => void | Promise<void>) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  abort: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
+type SpeechRecognitionWindow = Window & typeof globalThis & {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+};
+
 const SOURCE_LANGUAGES = [
   { code: "en", name: "English", locale: "en-US" },
   { code: "es", name: "Spanish (Español)", locale: "es-ES" },
@@ -71,7 +96,7 @@ export function TranslateView() {
   const [isListening, setIsListening] = useState(false);
   const [largeDisplayPhrase, setLargeDisplayPhrase] = useState("");
 
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -149,12 +174,13 @@ export function TranslateView() {
       return;
     }
 
-    startGeminiVoiceRecording();
+    startWebSpeechRecognition();
   };
 
   const startWebSpeechRecognition = () => {
     if (typeof window === "undefined") return;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const speechWindow = window as SpeechRecognitionWindow;
+    const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       startGeminiVoiceRecording();
       return;
@@ -174,7 +200,7 @@ export function TranslateView() {
         pushToast("Listening...", "Speak into your microphone now.", "info");
       };
 
-      recognition.onresult = async (event: any) => {
+      recognition.onresult = async (event) => {
         const transcript = event.results[0][0].transcript;
         if (transcript) {
           setSourceText(transcript);
@@ -201,7 +227,7 @@ export function TranslateView() {
         }
       };
 
-      recognition.onerror = (e: any) => {
+      recognition.onerror = (e) => {
         console.error("Speech Recognition Error:", e.error || e);
         
         if (e.error === "network") {
@@ -365,9 +391,10 @@ export function TranslateView() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-claude-ink-muted mb-1">Original Text</label>
+              <label htmlFor="translate-source-textarea" className="block text-xs font-semibold text-claude-ink-muted mb-1">Original Text</label>
               <div className="relative">
                 <textarea
+                  id="translate-source-textarea"
                   className="w-full min-h-[100px] rounded-xl border border-claude-border bg-white pl-3.5 pr-12 py-2 text-sm text-claude-ink focus:border-claude-accent focus:outline-none focus:ring-1 focus:ring-claude-accent"
                   placeholder="Type here, or click the microphone to speak..."
                   value={sourceText}
@@ -375,6 +402,7 @@ export function TranslateView() {
                 />
                 <button
                   type="button"
+                  id="translate-mic-button"
                   onClick={toggleListening}
                   className={`absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 ${
                     isListening
@@ -382,6 +410,7 @@ export function TranslateView() {
                       : "bg-claude-surface text-claude-ink-secondary hover:bg-claude-accent-soft hover:text-claude-accent"
                   }`}
                   title="Speak to translate"
+                  aria-label={isListening ? "Stop voice recording and translate" : "Start voice recording to translate"}
                 >
                   🎙️
                 </button>

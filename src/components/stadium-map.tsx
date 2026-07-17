@@ -3,7 +3,7 @@
 import { densityStatus } from "@/lib/ai-engine";
 import { useApp } from "@/context/app-context";
 import { useMemo, useState } from "react";
-import { Badge, Card } from "./ui";
+import { Badge } from "./ui";
 
 const SECTORS: { id: string; d: string; label: string; lx: number; ly: number }[] = [
   { id: "sector-112", d: "M 320,120 A 180,130 0 0,1 480,120 L 460,180 A 160,110 0 0,0 340,180 Z", label: "112", lx: 400, ly: 145 },
@@ -46,7 +46,7 @@ export function StadiumMapView() {
   const activeTicket = useMemo(() => {
     if (state.role !== "fan" || !state.myTicket?.ticketNo) return null;
     return tickets.find(t => t.ticketNo.toUpperCase() === state.myTicket.ticketNo.toUpperCase()) || null;
-  }, [state.role, state.myTicket?.ticketNo, tickets]);
+  }, [state.role, state.myTicket, tickets]);
 
   // Find coordinates for route lines
   const pathCoordinates = useMemo(() => {

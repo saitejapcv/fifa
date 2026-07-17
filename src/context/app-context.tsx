@@ -34,6 +34,15 @@ type Toast = {
   type?: "info" | "success" | "warning" | "danger";
 };
 
+type WorldCupStadium = {
+  id: string;
+  name_en: string;
+  city_en: string;
+  country_en: string;
+  capacity: number;
+  region?: string;
+};
+
 type AppContextValue = {
   state: AppState;
   stadiums: StadiumDTO[];
@@ -199,6 +208,7 @@ export function AppProvider({
   const simRef = useRef<StadiumSimulator | null>(null);
 
   const [currentUser, setCurrentUser] = useState<{ id: string; role: Role; username?: string } | null>(null);
+  const currentUserRef = useRef(currentUser);
   const [tickets, setTickets] = useState<TicketInfo[]>([]);
   const [staffCredentials, setStaffCredentials] = useState<{ id: string; password: string }[]>([]);
   const [organizerCredentials, setOrganizerCredentials] = useState<{ id: string; username: string; password: string }>({
@@ -207,15 +217,22 @@ export function AppProvider({
     password: "adminpass123",
   });
 
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+  }, [currentUser]);
+
   // Dynamically load the 16 real-world host stadiums from the API on mount
   useEffect(() => {
+    if (stadiums.length > 1) return;
+
     async function fetchStadiums() {
       try {
         const res = await fetch("/api/worldcup?endpoint=stadiums");
         if (res.ok) {
           const data = await res.json();
-          if (data.stadiums && data.stadiums.length > 0) {
-            const mappedStadiums = data.stadiums.map((s: any) => ({
+          const response = data as { stadiums?: WorldCupStadium[] };
+          if (response.stadiums && response.stadiums.length > 0) {
+            const mappedStadiums = response.stadiums.map((s) => ({
               id: s.id,
               name: s.name_en,
               city: s.city_en,
@@ -235,7 +252,7 @@ export function AppProvider({
       }
     }
     fetchStadiums();
-  }, []);
+  }, [stadiums.length]);
 
   useEffect(() => {
     // Load session
@@ -433,7 +450,7 @@ export function AppProvider({
       }));
       
       // Do NOT push incident toasts to fans
-      if (!currentUser || currentUser.role !== "fan") {
+      if (!currentUserRef.current || currentUserRef.current.role !== "fan") {
         pushToast(`${triage.severity} incident`, `${triage.type} at ${triage.location}`, "warning");
       }
     }
@@ -441,14 +458,22 @@ export function AppProvider({
     if (event.type === "weather-update") {
       setState((prev) => ({ ...prev, weather: event.weather }));
     }
-  }, [pushToast, currentUser]);
+  }, [pushToast]);
 
   useEffect(() => {
     const sim = new StadiumSimulator({ interval: 5000 });
     simRef.current = sim;
     const unsub = sim.subscribe(handleSimEvent);
     sim.start();
+
+    const syncSimulationWithVisibility = () => {
+      if (document.hidden) sim.stop();
+      else sim.start();
+    };
+    document.addEventListener("visibilitychange", syncSimulationWithVisibility);
+
     return () => {
+      document.removeEventListener("visibilitychange", syncSimulationWithVisibility);
       unsub();
       sim.stop();
     };

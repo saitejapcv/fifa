@@ -13,8 +13,8 @@ export async function GET(req: NextRequest) {
     }
 
     const res = await fetch(`https://worldcup26.ir/get/${endpoint}`, {
-      // Revalidate/Cache the data for 60 seconds to avoid hitting rate limits on the public API
-      next: { revalidate: 60 },
+      // Tournament data changes infrequently; cache upstream responses to reduce latency and API usage.
+      next: { revalidate: 300 },
     });
 
     if (!res.ok) {
@@ -25,7 +25,9 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
+    });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Failed to fetch World Cup data" },

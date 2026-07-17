@@ -314,7 +314,11 @@ export const StadiumAI = {
     const safeExits = exits
       .filter((e) => !blocked.has(e.id))
       .sort((a, b) => a.congestion - b.congestion);
-    const selected = safeExits[0] || exits[0];
+    const selected = safeExits[0] || exits[0] || {
+      id: "default",
+      name: "the nearest staffed exit",
+      congestion: 4,
+    };
 
     return {
       exit: selected,

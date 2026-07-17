@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Vercel CI/CD verified connection
+type GeminiRequest = {
+  query?: string;
+  system?: string;
+  model?: string;
+  contents?: unknown[];
+};
+
+const ALLOWED_MODELS = new Set(["gemma-4", "gemini-2.5-flash"]);
+const MAX_TEXT_LENGTH = 20_000;
+
+const isSafeText = (value: unknown) =>
+  typeof value === "string" && value.length > 0 && value.length <= MAX_TEXT_LENGTH;
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, system, model, contents } = await req.json();
+    const { query, system, model, contents } = (await req.json()) as GeminiRequest;
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -14,12 +25,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const MODEL = model || "gemma-4";
+    if (!isSafeText(system) || (!isSafeText(query) && !Array.isArray(contents))) {
+      return NextResponse.json({ error: "Invalid or oversized request." }, { status: 400 });
+    }
+
+    if (Array.isArray(contents) && JSON.stringify(contents).length > MAX_TEXT_LENGTH * 4) {
+      return NextResponse.json({ error: "Request content is too large." }, { status: 413 });
+    }
+
+    const MODEL = ALLOWED_MODELS.has(model ?? "") ? model ?? "gemma-4" : "gemma-4";
     const resolvedModel = MODEL === "gemma-4" ? "gemma-4-26b-a4b-it" : MODEL;
 
-    const body: any = {
-      system_instruction: { parts: [{ text: system }] },
-      contents: contents || [{ role: "user", parts: [{ text: query }] }],
+    const body: {
+      system_instruction: { parts: Array<{ text: string }> };
+      contents: unknown[];
+      generationConfig: Record<string, unknown>;
+    } = {
+      system_instruction: { parts: [{ text: system ?? "" }] },
+      contents: contents ?? [{ role: "user", parts: [{ text: query ?? "" }] }],
       generationConfig: { 
         temperature: 0.4, 
         maxOutputTokens: 1024,

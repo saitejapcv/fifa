@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { StadiumAI, severityTone } from "@/lib/ai-engine";
+import { StadiumAI } from "@/lib/ai-engine";
 import { useApp } from "@/context/app-context";
 import { Badge, Button, Card, ViewHeader } from "../ui";
 
