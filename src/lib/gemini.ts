@@ -403,12 +403,13 @@ export async function translateAudio(
   const system = [
     `You are a professional multilingual speech translation assistant.`,
     `Analyze the user's input audio which contains speech in ${srcName}.`,
-    `1. Transcribe the audio in its original language (${srcName}).`,
-    `2. Translate the transcript into ${targetName}.`,
-    `Output must be a valid JSON object matching this schema exactly, and nothing else. Do not wrap in markdown code blocks.`,
+    `You must perform two tasks:`,
+    `1. Transcribe the audio exactly in its original language (${srcName}) and set this as the "transcript" value.`,
+    `2. Translate that transcription into ${targetName} and set this as the "translation" value.`,
+    `Output must be a valid JSON object matching this schema exactly, and nothing else. Do not wrap in markdown code blocks:`,
     `{`,
-    `  "transcript": string (the transcription in ${srcName}),`,
-    `  "translation": string (the translation in ${targetName})`,
+    `  "transcript": "original language transcription",`,
+    `  "translation": "target language translation"`,
     `}`
   ].join("\n");
 
@@ -474,8 +475,21 @@ export async function translateAudio(
     }
 
     if (text) {
+      console.log("Raw audio translation API response:", text);
       const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      return JSON.parse(cleanText);
+      console.log("Cleaned JSON string:", cleanText);
+      try {
+        const parsed = JSON.parse(cleanText);
+        console.log("Parsed audio translation:", parsed);
+        const rawTranscript = parsed.transcript || parsed.transcription || "";
+        const rawTranslation = parsed.translation || parsed.translated || "";
+        return {
+          transcript: rawTranscript.replace(/^"|"$/g, "").trim(),
+          translation: rawTranslation.replace(/^"|"$/g, "").trim()
+        };
+      } catch (jsonErr) {
+        console.error("Failed to parse audio translation JSON:", jsonErr);
+      }
     }
   } catch (err) {
     console.error("Audio translation request failed:", err);
