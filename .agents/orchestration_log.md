@@ -186,4 +186,11 @@ Each entry follows this structure:
 - **Details**: Staged and committed all workspace updates. Pushed commits to GitHub remote origin branch `main`. Configured step-by-step instructions for native Vercel-GitHub connection to enable automatic builds and deployments on push.
 - **Files Affected**: GitHub repository, Vercel Dashboard connection, `.agents/task.md`, `.agents/orchestration_log.md`
 
+### [2026-07-17 19:22] T-025 — Integrate Official 2026 FIFA World Cup Logo
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Action**: Completed & Self-Validated
+- **Details**: Copied user-provided logo PNG to `public/logo.png` and `src/app/icon.png`. Updated `src/components/sidebar.tsx` and `src/components/login-page.tsx` to display the official logo image instead of the text placeholder "26". Staged, committed, and pushed modifications to GitHub to trigger Vercel redeployment.
+- **Files Affected**: `public/logo.png`, `src/app/icon.png`, `src/components/sidebar.tsx`, `src/components/login-page.tsx`, `.agents/task.md`, `.agents/orchestration_log.md`
+
 

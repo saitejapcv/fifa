@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Vercel CI/CD verified connection
+
 export async function POST(req: NextRequest) {
   try {
     const { query, system, model, contents } = await req.json();

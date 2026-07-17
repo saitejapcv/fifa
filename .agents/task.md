@@ -407,5 +407,21 @@
 - **Validation Result**: ✅ PASS
 - **Chain-Prompt Iterations**: 0
 
+---
+
+### Task T-025: Integrate Official 2026 FIFA World Cup Logo
+- **Status**: `[x]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Priority**: Medium
+- **Description**: Add the official 2026 FIFA World Cup logo as a local asset and integrate it in the Sidebar component, Login Page, and site favicon.
+- **Deliverable**: `public/logo.png`, `src/app/icon.png`, `src/components/sidebar.tsx`, `src/components/login-page.tsx`
+- **Acceptance Criteria**:
+  - [x] Save official World Cup logo to public static assets.
+  - [x] Replace "26" text placeholders in the Sidebar and Login Page with the logo image.
+  - [x] Configure Next.js dynamic site icon (`src/app/icon.png`) using the logo.
+- **Validation Result**: ✅ PASS
+- **Chain-Prompt Iterations**: 0
+
 
 
