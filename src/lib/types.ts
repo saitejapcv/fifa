@@ -1,4 +1,4 @@
-export type Role = "fan" | "staff" | "organizer";
+export type Role = "fan" | "staff" | "organizer" | "volunteer";
 
 export type ViewId =
   | "dashboard"
@@ -11,7 +11,8 @@ export type ViewId =
   | "sustainability"
   | "accessibility"
   | "volunteers"
-  | "settings";
+  | "settings"
+  | "translate";
 
 export type Severity = "Green" | "Amber" | "Red" | "info" | "success" | "warning" | "danger";
 
@@ -138,6 +139,11 @@ export interface AppState {
     assignedGate: string;
     ticketNo: string;
     batch: number;
+    stadiumId?: string;
+    seatNo?: string;
+    matchId?: string;
+    matchLabel?: string;
+    date?: string;
   };
   liveMatches: Record<string, { teams: string; score: string; time: string }>;
   highContrast: boolean;
@@ -163,3 +169,18 @@ export interface StadiumRecord {
   transit: string;
   accessibility: string;
 }
+
+export interface TicketInfo {
+  ticketNo: string;
+  matchId: string;
+  stadiumId: string;
+  section: string;
+  seatNo: string;
+  assignedGate: string;
+  batch: number;
+  date: string;
+  matchLabel: string;
+  staff: string[];
+  volunteers: string[];
+}
+

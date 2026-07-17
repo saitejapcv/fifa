@@ -12,6 +12,7 @@ export function LoginPage() {
 
   // Form states
   const [ticketNo, setTicketNo] = useState("");
+  const [volunteerName, setVolunteerName] = useState("");
   const [staffId, setStaffId] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
   const [orgId, setOrgId] = useState("");
@@ -24,6 +25,8 @@ export function LoginPage() {
 
     if (activeTab === "fan") {
       success = login("fan", { ticketNo });
+    } else if (activeTab === "volunteer") {
+      success = login("volunteer", { id: volunteerName });
     } else if (activeTab === "staff") {
       success = login("staff", { id: staffId, password: staffPassword });
     } else if (activeTab === "organizer") {
@@ -46,7 +49,9 @@ export function LoginPage() {
   const handleQuickFill = (role: Role) => {
     setActiveTab(role);
     if (role === "fan") {
-      setTicketNo("TICKET-12345");
+      setTicketNo("TICKET-METLIFE");
+    } else if (role === "volunteer") {
+      setVolunteerName("Emma Watson");
     } else if (role === "staff") {
       setStaffId("STAFF-001");
       setStaffPassword("staffpass123");
@@ -87,7 +92,7 @@ export function LoginPage() {
         <Card className="border border-claude-border/80 bg-white/70 shadow-lift backdrop-blur-xl">
           {/* Custom Tabs */}
           <div className="mb-6 flex rounded-xl bg-claude-surface p-1">
-            {(["fan", "staff", "organizer"] as Role[]).map((tab) => {
+            {(["fan", "volunteer", "staff", "organizer"] as Role[]).map((tab) => {
               const active = activeTab === tab;
               return (
                 <button
@@ -139,6 +144,33 @@ export function LoginPage() {
                     />
                     <p className="mt-1 text-[11px] text-claude-ink-muted">
                       Your match ticket ID validates your access.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === "volunteer" && (
+                <motion.div
+                  key="volunteer"
+                  initial={{ opacity: 0, x: 15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -15 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <Label htmlFor="volunteerName">Volunteer Full Name</Label>
+                    <Input
+                      id="volunteerName"
+                      type="text"
+                      required
+                      placeholder="e.g. Emma Watson"
+                      value={volunteerName}
+                      onChange={(e) => setVolunteerName(e.target.value)}
+                      className="bg-white/80"
+                    />
+                    <p className="mt-1 text-[11px] text-claude-ink-muted">
+                      Enter your full name to see your stadium dispatch assignments and directions.
                     </p>
                   </div>
                 </motion.div>
@@ -241,32 +273,42 @@ export function LoginPage() {
             Testing Credentials (Quick-Fill)
           </div>
           <p className="mb-3 text-center text-[11px] text-claude-ink-muted">
-            Click a button below to automatically load the demo login keys.
+            Click a button below to load keys. Fan tickets map directly to real stadiums:
+            <br />
+            <span className="font-semibold text-claude-accent font-serif">TICKET-METLIFE</span> (MetLife) · <span className="font-semibold text-claude-accent font-serif">TICKET-SOFI</span> (SoFi) · <span className="font-semibold text-claude-accent font-serif">TICKET-AZTECA</span> (Azteca)
           </p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-1.5">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleQuickFill("fan")}
-              className="text-[11px] hover:bg-white"
+              className="text-[10px] px-1 hover:bg-white"
             >
-              Fan Demo
+              Fan
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleQuickFill("volunteer")}
+              className="text-[10px] px-1 hover:bg-white"
+            >
+              Volunteer
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleQuickFill("staff")}
-              className="text-[11px] hover:bg-white"
+              className="text-[10px] px-1 hover:bg-white"
             >
-              Staff Demo
+              Staff
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleQuickFill("organizer")}
-              className="text-[11px] hover:bg-white"
+              className="text-[10px] px-1 hover:bg-white"
             >
-              Organizer Demo
+              Organizer
             </Button>
           </div>
         </Card>

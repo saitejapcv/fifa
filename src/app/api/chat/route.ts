@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, system, model } = await req.json();
+    const { query, system, model, contents } = await req.json();
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -12,17 +12,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const MODEL = model || "gemini-2.5-flash";
+    const MODEL = model || "gemma-4";
+    const resolvedModel = MODEL === "gemma-4" ? "gemma-4-26b-a4b-it" : MODEL;
+
+    const body: any = {
+      system_instruction: { parts: [{ text: system }] },
+      contents: contents || [{ role: "user", parts: [{ text: query }] }],
+      generationConfig: { 
+        temperature: 0.4, 
+        maxOutputTokens: 1024,
+        ...(resolvedModel.startsWith("gemma-4") ? { thinkingConfig: { thinkingLevel: "minimal" } } : {})
+      },
+    };
+
+    if (contents) {
+      body.generationConfig.responseMimeType = "application/json";
+    }
+
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${resolvedModel}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: system }] },
-          contents: [{ role: "user", parts: [{ text: query }] }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 512 },
-        }),
+        body: JSON.stringify(body),
       }
     );
 

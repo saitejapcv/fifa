@@ -16,13 +16,26 @@ const nav: { id: ViewId; label: string; short: string }[] = [
   { id: "sustainability", label: "Sustainability", short: "S" },
   { id: "accessibility", label: "Accessibility", short: "A" },
   { id: "volunteers", label: "Volunteers", short: "V" },
+  { id: "translate", label: "Translator", short: "🌐" },
   { id: "settings", label: "Settings", short: "·" },
 ];
 
-const roles: Role[] = ["fan", "staff", "organizer"];
+const roles: Role[] = ["fan", "staff", "organizer", "volunteer"];
 
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const { state, setView, currentUser, logout } = useApp();
+
+  const visibleNav = nav.filter((item) => {
+    if (state.role === "fan" && item.id === "volunteers") {
+      return false;
+    }
+    if (state.role === "volunteer") {
+      // Volunteers need Dashboard, Matches, Map, Volunteer Hub, Transit, Accessibility, and Translator
+      const allowed: string[] = ["dashboard", "matches", "map", "volunteers", "transit", "accessibility", "translate"];
+      return allowed.includes(item.id);
+    }
+    return true;
+  });
 
   return (
     <aside
@@ -50,7 +63,7 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-2" aria-label="Primary">
-        {nav.map((item) => {
+        {visibleNav.map((item) => {
           const active = state.selectedView === item.id;
           return (
             <button

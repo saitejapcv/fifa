@@ -7,7 +7,7 @@ import { timeAgo } from "@/lib/utils";
 import { Badge, Button, Card, Input, Label, Select, ViewHeader } from "../ui";
 
 export function IncidentsView() {
-  const { state, addIncident, simulateRandomIncident } = useApp();
+  const { state, addIncident } = useApp();
   const [filter, setFilter] = useState("all");
   const [type, setType] = useState("Medical");
   const [location, setLocation] = useState("North Concourse");
@@ -36,16 +36,66 @@ export function IncidentsView() {
     });
   };
 
+  if (state.role === "fan") {
+    return (
+      <div>
+        <ViewHeader
+          title="Report Incident"
+          subtitle="Notify stadium staff about safety, medical, or security concerns"
+        />
+
+        <Card className="mb-5 border-claude-danger/20 bg-claude-danger-soft/30" delay={0.05}>
+          <h2 className="mb-3 font-serif text-lg text-claude-danger">Report incident</h2>
+          <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3">
+            <div className="min-w-[140px] flex-1">
+              <Label htmlFor="inc-type">Category</Label>
+              <Select id="inc-type" value={type} onChange={(e) => setType(e.target.value)} className="w-full">
+                {["Medical", "Security", "Spill", "Lost Child", "Ticketing"].map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="min-w-[140px] flex-1">
+              <Label htmlFor="inc-loc">Location</Label>
+              <Select
+                id="inc-loc"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full"
+              >
+                {state.sectors.map((s) => (
+                  <option key={s.id} value={s.name}>
+                    {s.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="w-28">
+              <Label htmlFor="inc-den">Density</Label>
+              <Input
+                id="inc-den"
+                type="number"
+                min={1}
+                max={9}
+                step={0.5}
+                value={density}
+                onChange={(e) => setDensity(Number(e.target.value))}
+              />
+            </div>
+            <Button type="submit" variant="danger">
+              File alert
+            </Button>
+          </form>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div>
       <ViewHeader
         title="Incident Command"
         subtitle="Triage, file, and track operational alerts"
-        action={
-          <Button variant="danger" size="sm" onClick={simulateRandomIncident}>
-            Simulate random
-          </Button>
-        }
       />
 
       <Card className="mb-5 border-claude-danger/20 bg-claude-danger-soft/30" delay={0.05}>

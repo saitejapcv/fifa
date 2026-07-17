@@ -7,8 +7,6 @@ import { Button, Card, ViewHeader } from "../ui";
 export function AccessibilityView() {
   const {
     state,
-    setHighContrast,
-    setLargeText,
     currentStadium,
     pushToast,
   } = useApp();
@@ -19,7 +17,7 @@ export function AccessibilityView() {
     <div>
       <ViewHeader
         title="Accessibility Center"
-        subtitle="Display preferences and step-free routing"
+        subtitle="Step-free routing and stadium facility access"
         action={
           <Button
             size="sm"
@@ -36,24 +34,8 @@ export function AccessibilityView() {
         }
       />
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="mx-auto max-w-xl">
         <Card>
-          <h2 className="mb-4 font-serif text-xl text-claude-ink">Display</h2>
-          <ToggleRow
-            title="High contrast"
-            desc="Increase contrast for command-center visibility."
-            checked={state.highContrast}
-            onChange={setHighContrast}
-          />
-          <ToggleRow
-            title="Large text"
-            desc="Use larger operational text across the app."
-            checked={state.largeText}
-            onChange={setLargeText}
-          />
-        </Card>
-
-        <Card delay={0.08}>
           <h2 className="mb-3 font-serif text-xl text-claude-ink">Venue facilities</h2>
           <ul className="space-y-2">
             {(currentStadium?.accessibility || []).map((item) => (
@@ -73,42 +55,6 @@ export function AccessibilityView() {
           </div>
         </Card>
       </div>
-    </div>
-  );
-}
-
-function ToggleRow({
-  title,
-  desc,
-  checked,
-  onChange,
-}: {
-  title: string;
-  desc: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-claude-border py-4 last:border-0">
-      <div>
-        <div className="text-sm font-medium text-claude-ink">{title}</div>
-        <div className="text-xs text-claude-ink-secondary">{desc}</div>
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative h-7 w-12 rounded-full transition-colors duration-300 ${
-          checked ? "bg-claude-accent" : "bg-claude-border-strong"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform duration-300 ease-smooth ${
-            checked ? "translate-x-5" : "translate-x-0.5"
-          }`}
-        />
-      </button>
     </div>
   );
 }

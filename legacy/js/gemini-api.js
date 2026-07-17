@@ -2,8 +2,9 @@
   'use strict';
 
   const API_KEY_STORAGE_KEY = 'fifa2026.geminiApiKey';
-  const MODEL_NAME = 'gemini-2.5-flash';
-  const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
+  const MODEL_NAME = 'gemma-4';
+  const RESOLVED_MODEL = MODEL_NAME === 'gemma-4' ? 'gemma-4-26b-a4b-it' : MODEL_NAME;
+  const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${RESOLVED_MODEL}:generateContent`;
 
   const sanitizePlainText = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({
     '<': '&lt;',
@@ -92,7 +93,8 @@
         generationConfig: {
           temperature: 0.3,
           topP: 0.8,
-          maxOutputTokens: 700
+          maxOutputTokens: 700,
+          ...(RESOLVED_MODEL.startsWith('gemma-4') ? { thinkingConfig: { thinkingLevel: 'minimal' } } : {})
         }
       };
 

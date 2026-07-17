@@ -303,19 +303,93 @@
 ---
 
 ### Task T-018: Secure config.js Configuration & UI Setting Lock
-- **Status**: `[/]`
+- **Status**: `[x]`
 - **Assigned Agent**: Antigravity (Orchestrator)
 - **Model**: Claude Opus 4.6 (Thinking)
 - **Priority**: High
 - **Description**: Exclude config.js from git, create config.template.js, update HTML loader, update Gemini/Football API clients to check config parameters, and add settings panel lock states.
 - **Deliverable**: `.gitignore`, `index.html`, `js/config.template.js`, `js/gemini-api.js`, `js/football-api.js`, `js/dashboard.js`
 - **Acceptance Criteria**:
-  - [ ] js/config.js is added to `.gitignore`.
-  - [ ] js/config.template.js created.
-  - [ ] index.html loads config.js with fallback handler.
-  - [ ] API clients check window.StadiumConfig.
-  - [ ] UI locks settings form inputs when config values exist.
-- **Validation Result**: In Progress
+  - [x] js/config.js is added to `.gitignore`.
+  - [x] js/config.template.js created.
+  - [x] index.html loads config.js with fallback handler.
+  - [x] API clients check window.StadiumConfig.
+  - [x] UI locks settings form inputs when config values exist.
+- **Validation Result**: ✅ PASS
+- **Chain-Prompt Iterations**: 0
+
+---
+
+### Task T-019: Set Default Gemini Model to Gemma-4
+- **Status**: `[x]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Priority**: Low
+- **Description**: Update the default model configurations for all Gemini integration entry points from `gemini-2.5-flash` to `gemma-4` in the Next.js app and the legacy codebase. Centralize model string usages.
+- **Deliverable**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`
+- **Acceptance Criteria**:
+  - [x] Update default model name in Next.js routing and local client code.
+  - [x] Clean up hardcoded model usages to reference centralized constants.
+  - [x] Update legacy code model references.
+- **Validation Result**: ✅ PASS
+- **Chain-Prompt Iterations**: 0
+
+---
+
+### Task T-020: Resolve gemma-4 alias to a valid model ID
+- **Status**: `[x]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Priority**: Low
+- **Description**: Map `"gemma-4"` config name to `"gemma-4-26b-a4b-it"` in client and server routes.
+- **Deliverable**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`
+- **Acceptance Criteria**:
+  - [x] Resolve gemma-4 alias to gemma-4-26b-a4b-it for direct fetches.
+- **Validation Result**: ✅ PASS
+- **Chain-Prompt Iterations**: 0
+
+---
+
+### Task T-021: Disable thinkingConfig for Gemma-4 simple outputs
+- **Status**: `[x]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Priority**: Medium
+- **Description**: Add `thinkingBudget: 0` to generationConfig when Gemma 4 models are resolved to prevent thought chain text pollution.
+- **Deliverable**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`
+- **Acceptance Criteria**:
+  - [x] Configure thinkingBudget: 0 conditionally for Gemma models.
+- **Validation Result**: ✅ PASS
+- **Chain-Prompt Iterations**: 0
+
+---
+
+### Task T-022: Configure thinkingLevel: "minimal" for Gemma-4
+- **Status**: `[x]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Priority**: High
+- **Description**: Use `"thinkingLevel": "minimal"` instead of `"thinkingBudget": 0` inside `thinkingConfig` to disable Gemma 4's reasoning chain in a supported way for REST API requests.
+- **Deliverable**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`
+- **Acceptance Criteria**:
+  - [x] Configure thinkingLevel: "minimal" conditionally for Gemma models.
+- **Validation Result**: ✅ PASS
+- **Chain-Prompt Iterations**: 0
+
+---
+
+### Task T-023: Deploy Website and PostgreSQL Database for Free
+- **Status**: `[x]`
+- **Assigned Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Priority**: High
+- **Description**: Migrate database to a free Neon PostgreSQL instance, update schema configs, and deploy Next.js app to Vercel for free with secure environment variables.
+- **Deliverable**: `prisma/schema.prisma`, `.env`, Vercel production deployment
+- **Acceptance Criteria**:
+  - [x] Configure connection to remote Neon PostgreSQL database.
+  - [x] Push Prisma schema and seed stadium data to Neon.
+  - [x] Securely deploy Next.js app to Vercel with environment variables.
+- **Validation Result**: ✅ PASS
 - **Chain-Prompt Iterations**: 0
 
 

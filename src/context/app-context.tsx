@@ -24,6 +24,7 @@ import type {
   Role,
   StadiumDTO,
   ViewId,
+  TicketInfo,
 } from "@/lib/types";
 
 type Toast = {
@@ -59,7 +60,7 @@ type AppContextValue = {
   sendChat: (text: string) => Promise<void>;
   chatBusy: boolean;
   currentUser: { id: string; role: Role; username?: string } | null;
-  tickets: string[];
+  tickets: TicketInfo[];
   staffCredentials: { id: string; password: string }[];
   organizerCredentials: { id: string; username: string; password: string };
   login: (role: Role, fields: { ticketNo?: string; id?: string; username?: string; password?: string }) => boolean;
@@ -68,7 +69,78 @@ type AppContextValue = {
   addStaffCredential: (id: string, password: string) => boolean;
   updateStaffCredential: (id: string, newPassword: string) => boolean;
   deleteStaffCredential: (id: string) => void;
+  addTicket: (ticket: TicketInfo) => boolean;
+  updateTicket: (ticket: TicketInfo) => boolean;
+  deleteTicket: (ticketNo: string) => void;
 };
+
+const DEFAULT_TICKETS: TicketInfo[] = [
+  {
+    ticketNo: "TICKET-AZTECA",
+    matchId: "1",
+    stadiumId: "1",
+    section: "101",
+    seatNo: "Row D, Seat 14",
+    assignedGate: "A",
+    batch: 1,
+    date: "06/11/2026",
+    matchLabel: "Mexico vs. South Africa",
+    staff: ["John Smith (ID: STAFF-001)", "David Miller (ID: STAFF-002)"],
+    volunteers: ["Emma Watson", "Alex Green", "Lucas Hood"]
+  },
+  {
+    ticketNo: "TICKET-SOFI",
+    matchId: "19",
+    stadiumId: "16",
+    section: "112",
+    seatNo: "Row K, Seat 24",
+    assignedGate: "B",
+    batch: 2,
+    date: "06/16/2026",
+    matchLabel: "Argentina vs. Algeria",
+    staff: ["Wanda Maximoff (ID: STAFF-003)", "Vis (ID: STAFF-004)"],
+    volunteers: ["Carol Danvers", "Sam Wilson", "Bucky Barnes"]
+  },
+  {
+    ticketNo: "TICKET-METLIFE",
+    matchId: "10",
+    stadiumId: "11",
+    section: "104",
+    seatNo: "Row A, Seat 1",
+    assignedGate: "C",
+    batch: 3,
+    date: "06/14/2026",
+    matchLabel: "Germany vs. Curaçao",
+    staff: ["Sarah Jenkins (ID: STAFF-005)"],
+    volunteers: ["Peter Parker", "Ned Leeds", "Mary Jane"]
+  },
+  {
+    ticketNo: "TICKET-ATT",
+    matchId: "4",
+    stadiumId: "4",
+    section: "105",
+    seatNo: "Row G, Seat 8",
+    assignedGate: "D",
+    batch: 1,
+    date: "06/12/2026",
+    matchLabel: "United States vs. Paraguay",
+    staff: ["Arthur Dent (ID: STAFF-006)"],
+    volunteers: ["Ford Prefect", "Zaphod Beeblebrox"]
+  },
+  {
+    ticketNo: "TICKET-BCPLACE",
+    matchId: "22",
+    stadiumId: "13",
+    section: "110",
+    seatNo: "Row M, Seat 7",
+    assignedGate: "A",
+    batch: 2,
+    date: "06/17/2026",
+    matchLabel: "England vs. Croatia",
+    staff: ["Luke Skywalker (ID: STAFF-007)", "Leia Organa (ID: STAFF-008)"],
+    volunteers: ["Han Solo", "Chewbacca", "C-3PO"]
+  }
+];
 
 const AppContext = createContext<AppContextValue | null>(null);
 
@@ -111,7 +183,7 @@ export function AppProvider({
     ...initialState,
     incidents: initialIncidents?.length ? initialIncidents : initialState.incidents,
   }));
-  const [stadiums] = useState(initialStadiums);
+  const [stadiums, setStadiums] = useState<StadiumDTO[]>(initialStadiums);
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -127,7 +199,7 @@ export function AppProvider({
   const simRef = useRef<StadiumSimulator | null>(null);
 
   const [currentUser, setCurrentUser] = useState<{ id: string; role: Role; username?: string } | null>(null);
-  const [tickets, setTickets] = useState<string[]>([]);
+  const [tickets, setTickets] = useState<TicketInfo[]>([]);
   const [staffCredentials, setStaffCredentials] = useState<{ id: string; password: string }[]>([]);
   const [organizerCredentials, setOrganizerCredentials] = useState<{ id: string; username: string; password: string }>({
     id: "ORG-001",
@@ -135,14 +207,45 @@ export function AppProvider({
     password: "adminpass123",
   });
 
+  // Dynamically load the 16 real-world host stadiums from the API on mount
+  useEffect(() => {
+    async function fetchStadiums() {
+      try {
+        const res = await fetch("/api/worldcup?endpoint=stadiums");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.stadiums && data.stadiums.length > 0) {
+            const mappedStadiums = data.stadiums.map((s: any) => ({
+              id: s.id,
+              name: s.name_en,
+              city: s.city_en,
+              country: s.country_en,
+              capacity: s.capacity,
+              expandableCapacity: s.capacity,
+              matchLabel: s.region ? `${s.region} region operations` : "Tournament operations",
+              gates: ["A", "B", "C", "D"],
+              transit: ["Train", "Bus", "Rideshare"],
+              accessibility: ["Wheelchair seating", "Companion seating", "Sensory room"],
+            }));
+            setStadiums(mappedStadiums);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load real-world host stadiums:", e);
+      }
+    }
+    fetchStadiums();
+  }, []);
+
   useEffect(() => {
     // Load session
     const storedSession = localStorage.getItem("fifa_session");
+    let loggedInUser: { id: string; role: Role; username?: string } | null = null;
     if (storedSession) {
       try {
-        const parsed = JSON.parse(storedSession);
-        setCurrentUser(parsed);
-        setState(s => ({ ...s, role: parsed.role }));
+        loggedInUser = JSON.parse(storedSession);
+        setCurrentUser(loggedInUser);
+        setState(s => ({ ...s, role: loggedInUser!.role }));
       } catch (e) {
         localStorage.removeItem("fifa_session");
       }
@@ -150,15 +253,50 @@ export function AppProvider({
 
     // Load tickets
     const storedTickets = localStorage.getItem("fifa_tickets");
+    let activeTicketsList = DEFAULT_TICKETS;
     if (storedTickets) {
       try {
-        setTickets(JSON.parse(storedTickets));
+        const parsed = JSON.parse(storedTickets);
+        if (parsed.length > 0 && typeof parsed[0] === "string") {
+          activeTicketsList = DEFAULT_TICKETS;
+          localStorage.setItem("fifa_tickets", JSON.stringify(DEFAULT_TICKETS));
+        } else {
+          activeTicketsList = parsed;
+        }
       } catch (e) {
-        setTickets(["TICKET-12345"]);
+        activeTicketsList = DEFAULT_TICKETS;
+        localStorage.setItem("fifa_tickets", JSON.stringify(DEFAULT_TICKETS));
       }
     } else {
-      setTickets(["TICKET-12345"]);
-      localStorage.setItem("fifa_tickets", JSON.stringify(["TICKET-12345"]));
+      activeTicketsList = DEFAULT_TICKETS;
+      localStorage.setItem("fifa_tickets", JSON.stringify(DEFAULT_TICKETS));
+    }
+    setTickets(activeTicketsList);
+
+    // If logged in as fan or volunteer, sync myTicket and venueId from ticketsList
+    if (loggedInUser && (loggedInUser.role === "fan" || loggedInUser.role === "volunteer")) {
+      const matched = activeTicketsList.find(t => 
+        loggedInUser!.role === "fan" 
+          ? t.ticketNo.toUpperCase() === loggedInUser!.id.toUpperCase()
+          : t.volunteers.some(v => v.toUpperCase().includes(loggedInUser!.id.toUpperCase()))
+      );
+      if (matched) {
+        setState(s => ({
+          ...s,
+          venueId: matched.stadiumId,
+          myTicket: {
+            ticketNo: matched.ticketNo,
+            section: matched.section,
+            assignedGate: matched.assignedGate,
+            batch: matched.batch,
+            stadiumId: matched.stadiumId,
+            seatNo: matched.seatNo,
+            matchId: matched.matchId,
+            matchLabel: matched.matchLabel,
+            date: matched.date,
+          }
+        }));
+      }
     }
 
     // Load staff credentials
@@ -293,13 +431,17 @@ export function AppProvider({
           ...prev.decisions,
         ].slice(0, 30),
       }));
-      pushToast(`${triage.severity} incident`, `${triage.type} at ${triage.location}`, "warning");
+      
+      // Do NOT push incident toasts to fans
+      if (!currentUser || currentUser.role !== "fan") {
+        pushToast(`${triage.severity} incident`, `${triage.type} at ${triage.location}`, "warning");
+      }
     }
 
     if (event.type === "weather-update") {
       setState((prev) => ({ ...prev, weather: event.weather }));
     }
-  }, [pushToast]);
+  }, [pushToast, currentUser]);
 
   useEffect(() => {
     const sim = new StadiumSimulator({ interval: 5000 });
@@ -326,12 +468,64 @@ export function AppProvider({
   const login = useCallback((role: Role, fields: { ticketNo?: string; id?: string; username?: string; password?: string }): boolean => {
     if (role === "fan") {
       const ticketVal = fields.ticketNo?.trim() || "";
-      if (tickets.includes(ticketVal)) {
+      const matchedTicket = tickets.find(t => t.ticketNo.toUpperCase() === ticketVal.toUpperCase());
+      if (matchedTicket) {
         const user = { id: ticketVal, role: "fan" as Role };
         setCurrentUser(user);
         localStorage.setItem("fifa_session", JSON.stringify(user));
-        setState(s => ({ ...s, role: "fan" }));
-        pushToast("Welcome back!", `Logged in as Fan with ticket ${ticketVal}`, "success");
+        setState(s => ({
+          ...s,
+          role: "fan",
+          venueId: matchedTicket.stadiumId,
+          myTicket: {
+            ticketNo: matchedTicket.ticketNo,
+            section: matchedTicket.section,
+            assignedGate: matchedTicket.assignedGate,
+            batch: matchedTicket.batch,
+            stadiumId: matchedTicket.stadiumId,
+            seatNo: matchedTicket.seatNo,
+            matchId: matchedTicket.matchId,
+            matchLabel: matchedTicket.matchLabel,
+            date: matchedTicket.date,
+          }
+        }));
+        pushToast("Welcome back!", `Logged in as Fan with ticket ${ticketVal} for ${matchedTicket.matchLabel}`, "success");
+        return true;
+      }
+    } else if (role === "volunteer") {
+      const volName = fields.id?.trim() || "";
+      if (!volName) return false;
+      const matchedTicket = tickets.find(t => 
+        t.volunteers.some(v => v.toUpperCase().includes(volName.toUpperCase()))
+      );
+      if (matchedTicket) {
+        const user = { id: volName, role: "volunteer" as Role };
+        setCurrentUser(user);
+        localStorage.setItem("fifa_session", JSON.stringify(user));
+        setState(s => ({
+          ...s,
+          role: "volunteer",
+          venueId: matchedTicket.stadiumId,
+          myTicket: {
+            ticketNo: matchedTicket.ticketNo,
+            section: matchedTicket.section,
+            assignedGate: matchedTicket.assignedGate,
+            batch: matchedTicket.batch,
+            stadiumId: matchedTicket.stadiumId,
+            seatNo: matchedTicket.seatNo,
+            matchId: matchedTicket.matchId,
+            matchLabel: matchedTicket.matchLabel,
+            date: matchedTicket.date,
+          }
+        }));
+        pushToast("Welcome, Volunteer!", `Logged in as Volunteer: ${volName}`, "success");
+        return true;
+      } else {
+        const user = { id: volName, role: "volunteer" as Role };
+        setCurrentUser(user);
+        localStorage.setItem("fifa_session", JSON.stringify(user));
+        setState(s => ({ ...s, role: "volunteer" }));
+        pushToast("Welcome, Volunteer!", `Logged in as Volunteer: ${volName} (Demo Mode)`, "info");
         return true;
       }
     } else if (role === "staff") {
@@ -430,11 +624,62 @@ export function AppProvider({
     });
     pushToast("Staff deleted", `ID ${idVal} removed.`, "info");
   }, [pushToast]);
-  const setVenue = (id: string) => {
-    setState((s) => ({ ...s, venueId: id }));
+  const setVenue = useCallback((id: string) => {
+    setState((s) => {
+      // Lock venue for fan and volunteer
+      if (s.role === "fan" || s.role === "volunteer") {
+        return s;
+      }
+      return { ...s, venueId: id };
+    });
     const st = stadiums.find((x) => x.id === id);
     if (st) pushToast("Venue changed", st.name, "info");
-  };
+  }, [stadiums, pushToast]);
+
+  const addTicket = useCallback((ticket: TicketInfo) => {
+    let success = false;
+    setTickets((prev) => {
+      if (prev.some((t) => t.ticketNo.toUpperCase() === ticket.ticketNo.toUpperCase())) {
+        return prev;
+      }
+      const updated = [...prev, ticket];
+      localStorage.setItem("fifa_tickets", JSON.stringify(updated));
+      success = true;
+      return updated;
+    });
+    if (success) {
+      pushToast("Ticket Registered", `Ticket ${ticket.ticketNo} added.`, "success");
+    } else {
+      pushToast("Error adding ticket", `Ticket ${ticket.ticketNo} already exists.`, "danger");
+    }
+    return success;
+  }, [pushToast]);
+
+  const updateTicket = useCallback((ticket: TicketInfo) => {
+    let success = false;
+    setTickets((prev) => {
+      if (!prev.some((t) => t.ticketNo.toUpperCase() === ticket.ticketNo.toUpperCase())) {
+        return prev;
+      }
+      const updated = prev.map((t) => t.ticketNo.toUpperCase() === ticket.ticketNo.toUpperCase() ? ticket : t);
+      localStorage.setItem("fifa_tickets", JSON.stringify(updated));
+      success = true;
+      return updated;
+    });
+    if (success) {
+      pushToast("Ticket Updated", `Ticket ${ticket.ticketNo} successfully edited.`, "success");
+    }
+    return success;
+  }, [pushToast]);
+
+  const deleteTicket = useCallback((ticketNo: string) => {
+    setTickets((prev) => {
+      const updated = prev.filter((t) => t.ticketNo.toUpperCase() !== ticketNo.toUpperCase());
+      localStorage.setItem("fifa_tickets", JSON.stringify(updated));
+      return updated;
+    });
+    pushToast("Ticket Deleted", `Ticket ${ticketNo} has been removed.`, "info");
+  }, [pushToast]);
 
   const addIncident = async (
     data: Omit<Incident, "id" | "createdAt" | "status"> & { status?: string }
@@ -481,7 +726,11 @@ export function AppProvider({
     } catch {
       // local state already updated
     }
-    pushToast("Incident filed", `${triage.severity} — ${triage.type}`, "danger");
+    if (currentUser?.role === "fan") {
+      pushToast("Report Submitted", "Thank you. Stadium operations staff have been notified.", "success");
+    } else {
+      pushToast("Incident filed", `${triage.severity} — ${triage.type}`, "danger");
+    }
   };
 
   const simulateRandomIncident = () => {
@@ -649,6 +898,9 @@ export function AppProvider({
     addStaffCredential,
     updateStaffCredential,
     deleteStaffCredential,
+    addTicket,
+    updateTicket,
+    deleteTicket,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

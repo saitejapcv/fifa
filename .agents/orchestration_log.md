@@ -144,4 +144,39 @@ Each entry follows this structure:
 - **Validation**: ✅ PASS — All acceptance criteria met.
 - **Files Affected**: `index.html`, `js/football-api.js`, `js/dashboard.js`, `.agents/task.md`, `.agents/orchestration_log.md`
 
+### [2026-07-17 18:15] T-019 — Set Default Gemini Model to Gemma-4
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Action**: Completed & Self-Validated
+- **Details**: Updated default model configurations from `gemini-2.5-flash` to `gemma-4` in `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, and legacy `legacy/js/gemini-api.js`. Centralized model usages in `src/lib/gemini.ts` to utilize the `MODEL` constant. Ran project build successfully to verify.
+- **Files Affected**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`, `.agents/orchestration_log.md`
+
+### [2026-07-17 18:22] T-020 — Resolve gemma-4 Alias to gemma-4-26b-a4b-it
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Action**: Completed & Self-Validated
+- **Details**: Mapped the config-layer default `"gemma-4"` setting to the correct REST API identifier `"gemma-4-26b-a4b-it"` across both client routing and proxy routes to prevent 404 API errors.
+- **Files Affected**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`, `.agents/orchestration_log.md`
+
+### [2026-07-17 18:23] T-021 — Disable Gemma-4 thinkingConfig for clean translations
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Action**: Completed & Self-Validated
+- **Details**: Configured `thinkingBudget: 0` inside `generationConfig` conditionally for Gemma 4 models. This prevents the model from returning its internal reasoning chain in the raw text output, ensuring that only the direct translation/content is returned.
+- **Files Affected**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`, `.agents/orchestration_log.md`
+
+### [2026-07-17 18:25] T-022 — Configure thinkingLevel: "minimal" for Gemma-4
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Action**: Completed & Self-Validated
+- **Details**: Updated `thinkingConfig` to use `"thinkingLevel": "minimal"` instead of `"thinkingBudget": 0` when resolved model is a Gemma-4 variant. This resolves the `400 INVALID_ARGUMENT` error because Gemma 4 REST API requires `thinkingLevel` rather than `thinkingBudget`.
+- **Files Affected**: `src/lib/gemini.ts`, `src/app/api/chat/route.ts`, `legacy/js/gemini-api.js`, `.agents/orchestration_log.md`
+
+### [2026-07-17 18:31] T-023 — Deploy Website and PostgreSQL Database for Free
+- **Agent**: Antigravity (Orchestrator)
+- **Model**: Gemini 3.5 Flash
+- **Action**: Completed & Self-Validated
+- **Details**: Switched database datasource provider in `prisma/schema.prisma` to `"postgresql"`. Connected and synchronized local `.env` with the user's free Neon PostgreSQL instance. Ran schema push and seeded the remote database with 14 tournament stadiums. Logged in and linked the local directory to Vercel project, configured production/preview environment variables, and successfully deployed to Vercel production.
+- **Files Affected**: `prisma/schema.prisma`, `.env`, Vercel Deployment, `.agents/task.md`, `.agents/orchestration_log.md`
+
 

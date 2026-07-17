@@ -21,6 +21,7 @@ import { SustainabilityView } from "./views/sustainability-view";
 import { TransitView } from "./views/transit-view";
 import { VolunteersView } from "./views/volunteers-view";
 import { MatchesView } from "./views/matches-view";
+import { TranslateView } from "./views/translate-view";
 
 const views: Record<ViewId, ComponentType> = {
   dashboard: DashboardView,
@@ -33,6 +34,7 @@ const views: Record<ViewId, ComponentType> = {
   sustainability: SustainabilityView,
   accessibility: AccessibilityView,
   volunteers: VolunteersView,
+  translate: TranslateView,
   settings: SettingsView,
 };
 

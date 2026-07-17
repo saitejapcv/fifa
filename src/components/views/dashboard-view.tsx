@@ -150,33 +150,35 @@ export function DashboardView() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card delay={0.18}>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-serif text-xl text-claude-ink">AI decision feed</h2>
-            <Badge tone="info">Live</Badge>
-          </div>
-          <div className="space-y-3">
-            {state.decisions.slice(0, 8).map((d) => (
-              <div
-                key={d.id}
-                className="rounded-xl border border-claude-border bg-claude-bg/60 px-4 py-3"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-sm font-medium text-claude-ink">{d.title}</div>
-                  <Badge tone={severityTone(d.severity) as "info" | "success" | "warning" | "danger"}>
-                    {d.severity}
-                  </Badge>
+      <div className={`grid gap-4 ${state.role === "fan" ? "lg:grid-cols-1" : "lg:grid-cols-2"}`}>
+        {state.role !== "fan" && (
+          <Card delay={0.18}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-serif text-xl text-claude-ink">AI decision feed</h2>
+              <Badge tone="info">Live</Badge>
+            </div>
+            <div className="space-y-3">
+              {state.decisions.slice(0, 8).map((d) => (
+                <div
+                  key={d.id}
+                  className="rounded-xl border border-claude-border bg-claude-bg/60 px-4 py-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-medium text-claude-ink">{d.title}</div>
+                    <Badge tone={severityTone(d.severity) as "info" | "success" | "warning" | "danger"}>
+                      {d.severity}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-claude-ink-secondary">{d.body}</p>
+                  <div className="mt-2 text-[11px] text-claude-ink-muted">
+                    <span suppressHydrationWarning>{timeAgo(d.createdAt)}</span>
+                    {d.confidence != null && ` · ${(d.confidence * 100).toFixed(0)}% conf.`}
+                  </div>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-claude-ink-secondary">{d.body}</p>
-                <div className="mt-2 text-[11px] text-claude-ink-muted">
-                  <span suppressHydrationWarning>{timeAgo(d.createdAt)}</span>
-                  {d.confidence != null && ` · ${(d.confidence * 100).toFixed(0)}% conf.`}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        )}
 
         <Card delay={0.24}>
           <h2 className="mb-4 font-serif text-xl text-claude-ink">Venue snapshot</h2>
