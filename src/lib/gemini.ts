@@ -438,7 +438,7 @@ export async function translateAudio(
         body: JSON.stringify({
           contents,
           system,
-          model: MODEL,
+          model: "gemini-2.5-flash",
         }),
       });
 
@@ -450,7 +450,7 @@ export async function translateAudio(
         .trim();
     } else {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${RESOLVED_MODEL}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -460,7 +460,6 @@ export async function translateAudio(
             generationConfig: {
               temperature: 0.2,
               responseMimeType: "application/json",
-              ...(IS_GEMMA ? { thinkingConfig: { thinkingLevel: "minimal" } } : {})
             },
           }),
         }

@@ -140,12 +140,6 @@ export function TranslateView() {
 
   const toggleListening = () => {
     if (isListening) {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch {}
-        recognitionRef.current = null;
-      }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
         try {
           mediaRecorderRef.current.stop();
@@ -155,7 +149,7 @@ export function TranslateView() {
       return;
     }
 
-    startWebSpeechRecognition();
+    startGeminiVoiceRecording();
   };
 
   const startWebSpeechRecognition = () => {
