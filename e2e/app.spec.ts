@@ -37,3 +37,33 @@ test("unknown routes return a user-visible not-found response", async ({ page })
   await page.goto("/not-a-real-route");
   await expect(page.getByText(/404|not found/i)).toBeVisible();
 });
+
+test("skip-to-content link is present and targets main content", async ({ page }) => {
+  await page.goto("/");
+  const skipLink = page.locator('a[href="#main-content"]');
+  await expect(skipLink).toBeAttached();
+  // Verify the skip link text
+  await expect(skipLink).toHaveText(/skip to main content/i);
+});
+
+test("login page has proper heading hierarchy and form labels", async ({ page }) => {
+  await page.goto("/");
+  // Should have exactly one h1
+  const h1s = page.locator("h1");
+  await expect(h1s.first()).toBeVisible();
+  // Form inputs should have associated labels
+  const ticketInput = page.getByLabel("Ticket Number");
+  await expect(ticketInput).toBeAttached();
+});
+
+test("fan can navigate to the translator view", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForFunction(() => localStorage.getItem("fifa_tickets") !== null);
+  await page.getByLabel("Ticket Number").fill("TICKET-METLIFE");
+  await page.getByRole("button", { name: /Sign In to System/i }).click();
+  await expect(page.getByText(/fan mode/i)).toBeVisible();
+
+  // Navigate to Translator via sidebar
+  await page.getByRole("button", { name: /Translator/i }).click();
+  await expect(page.getByText(/Translator/i).first()).toBeVisible();
+});

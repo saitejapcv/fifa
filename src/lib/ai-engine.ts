@@ -1,3 +1,13 @@
+/**
+ * Deterministic AI Engine for FIFA 2026 Smart Stadium operations.
+ *
+ * Provides instant, offline-capable analytics for crowd density, gate flow,
+ * incident triage, queue prediction, staff deployment, sustainability scoring,
+ * and evacuation planning. All computations run client-side with zero API
+ * latency, using configurable thresholds and heuristic scoring.
+ *
+ * @module ai-engine
+ */
 import type {
   AIResponse,
   Gate,
@@ -53,6 +63,7 @@ const createResponse = (
 });
 
 export const StadiumAI = {
+  /** Analyze crowd density across all stadium sectors and generate severity alerts. */
   analyzeCrowdDensity(sectors: Sector[] = []) {
     const analyzed = sectors.map((sector) => {
       const density = round(sector.density);
@@ -108,6 +119,7 @@ export const StadiumAI = {
     };
   },
 
+  /** Optimize gate throughput by proposing fan-diversion commands between gates. */
   optimizeGateFlow(gates: Gate[] = []) {
     const sortedByWait = [...gates].sort((a, b) => b.waitMinutes - a.waitMinutes);
     const overloaded = sortedByWait.filter(
@@ -150,6 +162,7 @@ export const StadiumAI = {
     };
   },
 
+  /** Triage a stadium incident by scoring severity based on type, density, and kickoff proximity. */
   triageIncident(incident: Partial<Incident> = {}) {
     const density = Number(incident.crowdDensity ?? 0);
     const minutesToKickoff = Number(incident.minutesToKickoff ?? 90);
@@ -187,6 +200,7 @@ export const StadiumAI = {
     };
   },
 
+  /** Predict short-horizon queue wait times and suggest lower-wait alternatives. */
   predictQueueWait(queue: QueueItem, allQueues: QueueItem[] = []) {
     const currentWait = Number(queue.waitMinutes ?? 0);
     const arrivalPressure =
@@ -213,6 +227,7 @@ export const StadiumAI = {
     };
   },
 
+  /** Recommend staff deployment priorities based on density hot spots and active incidents. */
   recommendStaffDeployment(densityMap: Sector[] = [], incidents: Incident[] = []) {
     const densityNeeds = densityMap
       .filter((s) => s.density > 4)
@@ -257,6 +272,7 @@ export const StadiumAI = {
     };
   },
 
+  /** Calculate a composite sustainability score (0–100) from carbon, energy, waste, and water metrics. */
   calculateSustainabilityScore(metrics: Sustainability) {
     const fans = Math.max(Number(metrics.fans ?? 1), 1);
     const carbonIntensity = round(Number(metrics.transportKgCO2e ?? 0) / fans, 2);
@@ -297,6 +313,7 @@ export const StadiumAI = {
     };
   },
 
+  /** Plan an optimal evacuation route by selecting the least-congested unblocked exit. */
   planEvacuationRoute(
     crowdState: {
       exits?: { id: string; name: string; congestion: number }[];
@@ -333,6 +350,7 @@ export const StadiumAI = {
     };
   },
 
+  /** Generate a context-aware fallback response when GenAI is unavailable. */
   matchFallbackResponse(
     query = "",
     context: {
@@ -455,6 +473,7 @@ export const StadiumAI = {
   },
 };
 
+/** Map a numeric density value to a human-readable status label. */
 export function densityStatus(density: number) {
   if (density > 6) return "critical" as const;
   if (density > 4) return "crowded" as const;
@@ -462,6 +481,7 @@ export function densityStatus(density: number) {
   return "safe" as const;
 }
 
+/** Convert a severity string (Red/Amber/Green) to a UI tone for Badge components. */
 export function severityTone(severity?: string) {
   const v = String(severity || "").toLowerCase();
   if (v === "red" || v === "danger") return "danger";

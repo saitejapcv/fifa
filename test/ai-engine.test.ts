@@ -61,3 +61,45 @@ test("density status has stable threshold boundaries", () => {
   assert.equal(densityStatus(4.1), "crowded");
   assert.equal(densityStatus(6.1), "critical");
 });
+
+test("sustainability score rewards high renewable energy and waste diversion", () => {
+  const highScore = StadiumAI.calculateSustainabilityScore({
+    fans: 50000,
+    transportKgCO2e: 10000,
+    renewableEnergyPct: 95,
+    gridLoadPct: 20,
+    wasteDiversionPct: 90,
+    waterSavedLiters: 200000,
+  });
+
+  const lowScore = StadiumAI.calculateSustainabilityScore({
+    fans: 50000,
+    transportKgCO2e: 100000,
+    renewableEnergyPct: 10,
+    gridLoadPct: 95,
+    wasteDiversionPct: 15,
+    waterSavedLiters: 500,
+  });
+
+  assert.ok(highScore.score > lowScore.score, "High sustainability metrics should yield higher score");
+  assert.ok(highScore.score >= 0 && highScore.score <= 100, "Score must be bounded 0-100");
+  assert.ok(lowScore.score >= 0 && lowScore.score <= 100, "Score must be bounded 0-100");
+});
+
+test("fallback response covers navigation queries", () => {
+  const response = StadiumAI.matchFallbackResponse("how do I find my seat section?", {
+    venueName: "MetLife Stadium",
+    role: "fan",
+  });
+
+  assert.equal(response.source, "local-ai-engine");
+  assert.ok(response.summary.includes("MetLife Stadium"));
+  assert.ok(response.cards.length > 0);
+});
+
+test("fallback response handles unknown queries gracefully", () => {
+  const response = StadiumAI.matchFallbackResponse("what is the meaning of life?", {});
+
+  assert.equal(response.source, "local-ai-engine");
+  assert.ok(response.summary.length > 0);
+});

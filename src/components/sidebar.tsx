@@ -60,7 +60,7 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
         )}
       </div>
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto p-2" aria-label="Primary">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto p-2" role="navigation" aria-label="Primary">
         {visibleNav.map((item) => {
           const active = state.selectedView === item.id;
           return (

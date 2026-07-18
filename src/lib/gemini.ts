@@ -1,3 +1,16 @@
+/**
+ * Gemini API integration layer for FIFA 2026 Smart Stadium.
+ *
+ * Provides server-proxied and direct-key access to Google Gemini for:
+ * - Conversational AI assistant (askAssistant)
+ * - Roster/CSV parsing (parseRosterData)
+ * - Text translation (translateText)
+ * - Audio transcription + translation (translateAudio)
+ *
+ * All requests are sanitized, size-limited, and timeout-protected.
+ *
+ * @module gemini
+ */
 import { StadiumAI } from "./ai-engine";
 import type { AIResponse, AppState } from "./types";
 
@@ -45,11 +58,13 @@ function sanitize(value: string) {
     .trim();
 }
 
+/** Retrieve the user's Gemini API key from localStorage (client-only). */
 export function getStoredGeminiKey() {
   if (typeof window === "undefined") return "";
   return localStorage.getItem("fifa2026.geminiApiKey") || "";
 }
 
+/** Validate and persist a Gemini API key to localStorage. */
 export function saveGeminiKey(rawKey: string) {
   const key = String(rawKey || "").trim();
   if (!/^[A-Za-z0-9_\-]{20,}$/.test(key)) {
@@ -58,6 +73,7 @@ export function saveGeminiKey(rawKey: string) {
   localStorage.setItem("fifa2026.geminiApiKey", key);
 }
 
+/** Remove the stored Gemini API key from localStorage. */
 export function clearGeminiKey() {
   localStorage.removeItem("fifa2026.geminiApiKey");
 }
@@ -97,6 +113,13 @@ async function fetchWorldCupData() {
   };
 }
 
+/**
+ * Send a contextual query to the Gemini-powered stadium assistant.
+ *
+ * Enriches the prompt with live crowd density, incident, and match schedule
+ * data before calling the Gemini API. Falls back to the deterministic
+ * StadiumAI engine if the network call fails.
+ */
 export async function askAssistant(
   query: string,
   context: Partial<AppState> & { venueName?: string }
@@ -216,6 +239,12 @@ export async function askAssistant(
   }
 }
 
+/**
+ * Parse an uploaded roster file (CSV, JSON, or unstructured text) into
+ * structured ticket and staff credential records.
+ *
+ * Strategy: JSON parse → GenAI structured extraction → CSV fallback.
+ */
 export async function parseRosterData(
   fileContent: string,
   stadiumsList: { id: string; name: string }[] = []
@@ -349,6 +378,10 @@ export async function parseRosterData(
   return { tickets, staff };
 }
 
+/**
+ * Translate text from one language to another using Gemini.
+ * Returns the translated text string, or throws on failure.
+ */
 export async function translateText(
   text: string,
   targetLang: string
@@ -418,6 +451,12 @@ export async function translateText(
   }
 }
 
+/**
+ * Transcribe and translate audio using Gemini 2.5 Flash multimodal input.
+ *
+ * Accepts base64-encoded audio, returns both the original-language transcript
+ * and the target-language translation as structured JSON.
+ */
 export async function translateAudio(
   base64Audio: string,
   mimeType: string,
@@ -504,10 +543,8 @@ export async function translateAudio(
     if (text) {
       console.log("Raw audio translation API response:", text);
       const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      console.log("Cleaned JSON string:", cleanText);
       try {
         const parsed = JSON.parse(cleanText);
-        console.log("Parsed audio translation:", parsed);
         const rawTranscript = parsed.transcript || parsed.transcription || "";
         const rawTranslation = parsed.translation || parsed.translated || "";
         return {

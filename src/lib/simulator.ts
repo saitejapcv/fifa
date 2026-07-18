@@ -1,3 +1,12 @@
+/**
+ * Real-time stadium simulation engine.
+ *
+ * Generates synthetic crowd flow, weather, and incident events that drive
+ * the live dashboard. Runs on a configurable tick interval and broadcasts
+ * events to subscribed listeners via a pub/sub pattern.
+ *
+ * @module simulator
+ */
 export type SimSector = {
   density: number;
   occupied: number;
@@ -45,6 +54,7 @@ const LOCATIONS = [
   "Gate B ramp",
 ];
 
+/** Simulates match-day crowd dynamics across 24 stadium sectors. */
 export class StadiumSimulator {
   interval: number;
   matchPhase = "pre-match";
@@ -225,6 +235,10 @@ function round1(n: number) {
   return Number(n.toFixed(1));
 }
 
+/**
+ * Aggregate sector-level data into directional regions (north/east/south/west)
+ * for the stadium overview dashboard.
+ */
 export function aggregateSectors(sectorMapData: Record<string, SimSector>) {
   const aggregation: Record<string, { count: number; sum: number }> = {
     north: { count: 0, sum: 0 },

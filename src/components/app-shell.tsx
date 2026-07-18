@@ -91,7 +91,7 @@ export function AppShell() {
         )}
       >
         <Header onMenu={() => setMobileOpen(true)} />
-        <main className="flex-1 px-4 py-6 pb-24 md:px-8 md:pb-8">
+        <main id="main-content" className="flex-1 px-4 py-6 pb-24 md:px-8 md:pb-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={state.selectedView}
@@ -106,7 +106,7 @@ export function AppShell() {
         </main>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-claude-border bg-claude-card/95 px-2 py-2 backdrop-blur md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-claude-border bg-claude-card/95 px-2 py-2 backdrop-blur md:hidden" aria-label="Mobile navigation">
         {mobileNav.map((item) => (
           <button
             key={item.id}
