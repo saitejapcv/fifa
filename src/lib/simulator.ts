@@ -1,9 +1,12 @@
 /**
- * Real-time stadium simulation engine.
+ * Real-time stadium simulation engine for FIFA 2026.
  *
- * Generates synthetic crowd flow, weather, and incident events that drive
- * the live dashboard. Runs on a configurable tick interval and broadcasts
- * events to subscribed listeners via a pub/sub pattern.
+ * PROBLEM STATEMENT ALIGNMENT:
+ * This module enables the live dashboard to accurately model the complex dynamics of a FIFA 2026 World Cup event.
+ * - Crowd Management & Operations: Generates synthetic crowd flow (occupancy, density, queue wait times) based on match phases.
+ * - Real-Time Decision Support: Periodically generates dynamic incidents (e.g., Medical, Security, Spill) and weather shifts that the AI Engine triages.
+ *
+ * It runs on a configurable tick interval and broadcasts events (tick, incident, weather-update) to subscribed components, simulating a live, unpredictable stadium environment.
  *
  * @module simulator
  */

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -136,7 +137,7 @@ export function MatchesView() {
       if (Array.isArray(parsed)) return parsed;
       if (typeof parsed === "object") return Object.values(parsed) as string[];
       return [String(parsed)];
-    } catch (e) {
+    } catch {
       const cleaned = scorersStr.replace(/[{}"[\]]/g, "").trim();
       if (!cleaned) return [];
       return cleaned.split(",").map((s) => s.replace(/["']/g, "").trim()).filter(Boolean);

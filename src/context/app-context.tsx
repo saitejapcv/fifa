@@ -69,6 +69,7 @@ type AppContextValue = {
   sendChat: (text: string) => Promise<void>;
   chatBusy: boolean;
   currentUser: { id: string; role: Role; username?: string } | null;
+  isInitialized: boolean;
   tickets: TicketInfo[];
   staffCredentials: { id: string; password: string }[];
   organizerCredentials: { id: string; username: string; password: string };
@@ -208,6 +209,7 @@ export function AppProvider({
   const simRef = useRef<StadiumSimulator | null>(null);
 
   const [currentUser, setCurrentUser] = useState<{ id: string; role: Role; username?: string } | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const currentUserRef = useRef(currentUser);
   const [tickets, setTickets] = useState<TicketInfo[]>([]);
   const [staffCredentials, setStaffCredentials] = useState<{ id: string; password: string }[]>([]);
@@ -247,15 +249,15 @@ export function AppProvider({
             setStadiums(mappedStadiums);
           }
         }
-      } catch (e) {
-        console.error("Failed to load real-world host stadiums:", e);
+      } catch {
+        console.error("Failed to load real-world host stadiums");
       }
     }
     fetchStadiums();
   }, [stadiums.length]);
 
   useEffect(() => {
-    // Load session
+    // Browser-only preferences and credentials must be loaded before authentication is enabled.
     const storedSession = localStorage.getItem("fifa_session");
     let loggedInUser: { id: string; role: Role; username?: string } | null = null;
     if (storedSession) {
@@ -263,7 +265,7 @@ export function AppProvider({
         loggedInUser = JSON.parse(storedSession);
         setCurrentUser(loggedInUser);
         setState(s => ({ ...s, role: loggedInUser!.role }));
-      } catch (e) {
+      } catch {
         localStorage.removeItem("fifa_session");
       }
     }
@@ -280,7 +282,7 @@ export function AppProvider({
         } else {
           activeTicketsList = parsed;
         }
-      } catch (e) {
+      } catch {
         activeTicketsList = DEFAULT_TICKETS;
         localStorage.setItem("fifa_tickets", JSON.stringify(DEFAULT_TICKETS));
       }
@@ -321,7 +323,7 @@ export function AppProvider({
     if (storedStaff) {
       try {
         setStaffCredentials(JSON.parse(storedStaff));
-      } catch (e) {
+      } catch {
         setStaffCredentials([{ id: "STAFF-001", password: "staffpass123" }]);
       }
     } else {
@@ -335,7 +337,7 @@ export function AppProvider({
     if (storedOrg) {
       try {
         setOrganizerCredentials(JSON.parse(storedOrg));
-      } catch (e) {
+      } catch {
         // Keep default
       }
     } else {
@@ -345,6 +347,8 @@ export function AppProvider({
         password: "adminpass123",
       }));
     }
+
+    setIsInitialized(true);
   }, []);
 
   const currentStadium = useMemo(
@@ -913,7 +917,8 @@ export function AppProvider({
     refreshDecisions,
     sendChat,
     chatBusy,
-    currentUser,
+      currentUser,
+      isInitialized,
     tickets,
     staffCredentials,
     organizerCredentials,

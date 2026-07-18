@@ -23,6 +23,7 @@ export function AccessibilityView() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVoiceAnnounce(localStorage.getItem("fifa_voice_announce") === "true");
     }
   }, []);

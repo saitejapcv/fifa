@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import { motion } from "framer-motion";
 import { useApp } from "@/context/app-context";
 import type { ViewId } from "@/lib/types";

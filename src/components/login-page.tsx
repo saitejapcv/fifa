@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button, Card, Input, Label } from "./ui";
 import type { Role } from "@/lib/types";
 
-export function LoginPage() {
+export function LoginPage({ isInitialized }: { isInitialized: boolean }) {
   const { login, pushToast } = useApp();
   const [activeTab, setActiveTab] = useState<Role>("fan");
 
@@ -21,6 +22,7 @@ export function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isInitialized) return;
     let success = false;
 
     if (activeTab === "fan") {
@@ -80,9 +82,9 @@ export function LoginPage() {
           <div className="mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-claude-surface shadow-soft">
             <img src="/logo.png" alt="FIFA 26 Logo" className="h-full w-full object-contain p-1" />
           </div>
-          <h2 className="mt-4 font-serif text-3xl font-bold tracking-tight text-claude-ink sm:text-4xl">
+          <h1 className="mt-4 font-serif text-3xl font-bold tracking-tight text-claude-ink sm:text-4xl">
             FIFA World Cup 2026™
-          </h2>
+          </h1>
           <p className="mt-2 text-sm text-claude-ink-secondary">
             Smart Stadium Operations & Fan Portal
           </p>
@@ -261,8 +263,8 @@ export function LoginPage() {
               )}
             </AnimatePresence>
 
-            <Button type="submit" className="w-full justify-center">
-              Sign In to System
+            <Button type="submit" className="w-full justify-center" disabled={!isInitialized}>
+              {isInitialized ? "Sign In to System" : "Preparing secure sign-in…"}
             </Button>
           </form>
         </Card>

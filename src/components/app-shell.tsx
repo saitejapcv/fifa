@@ -47,7 +47,7 @@ const mobileNav: { id: ViewId; label: string }[] = [
 ];
 
 export function AppShell() {
-  const { state, setView, currentUser } = useApp();
+  const { state, setView, currentUser, isInitialized } = useApp();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const Active = views[state.selectedView] || DashboardView;
@@ -55,7 +55,7 @@ export function AppShell() {
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-claude-bg text-claude-ink">
-        <LoginPage />
+        <LoginPage isInitialized={isInitialized} />
         <ToastHost />
       </div>
     );

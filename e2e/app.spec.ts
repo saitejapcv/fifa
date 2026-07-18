@@ -11,7 +11,7 @@ test("fan can use demo credentials and reach the operations dashboard", async ({
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: /FIFA World Cup 2026/i })).toBeVisible();
-  await page.waitForFunction(() => localStorage.getItem("fifa_tickets") !== null);
+  await expect(page.getByRole("button", { name: /Sign In to System/i })).toBeEnabled();
   await page.getByLabel("Ticket Number").fill("TICKET-METLIFE");
   await page.getByRole("button", { name: /Sign In to System/i }).click();
 
@@ -22,14 +22,14 @@ test("fan can use demo credentials and reach the operations dashboard", async ({
 test("staff can navigate to incident operations", async ({ page }) => {
   await page.goto("/");
 
-  await page.waitForFunction(() => localStorage.getItem("fifa_staff_creds") !== null);
+  await expect(page.getByRole("button", { name: /Sign In to System/i })).toBeEnabled();
   await page.getByRole("button", { name: "staff", exact: true }).click();
   await page.getByLabel("Staff Identification ID").fill("STAFF-001");
   await page.getByLabel("Password").fill("staffpass123");
   await page.getByRole("button", { name: /Sign In to System/i }).click();
 
   await expect(page.getByText(/staff mode/i)).toBeVisible();
-  await page.getByRole("button", { name: "Incidents", exact: true }).click();
+  await page.locator('button').filter({ hasText: 'Incidents' }).click();
   await expect(page.getByText(/Incident Command/i)).toBeVisible();
 });
 
