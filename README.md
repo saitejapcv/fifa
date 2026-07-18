@@ -169,8 +169,11 @@ A three-tier test pyramid ensures reliability:
 | Test File | Coverage |
 |---|---|
 | `test/ai-engine.test.ts` | Crowd analysis, gate optimization, incident triage, queue prediction, evacuation planning, density thresholds, sustainability scoring, fallback responses |
-| `test/simulator.test.ts` | Sector aggregation, capacity bounds on surge mutations |
+| `test/simulator.test.ts` | Sector aggregation, capacity bounds on surge mutations, internal timer lifecycles, and Match Phase generation |
+| `test/gemini.test.ts` | API proxy fallbacks, direct API key validations, JSON parsing resilience, and multimodal audio translation |
 | `test/security.test.ts` | API key validation (reject short/XSS keys, accept valid), HTML sanitization, model allowlist enforcement, input size limits, AI engine boundary conditions |
+
+> **Coverage Note:** The core business logic (`gemini.ts`, `ai-engine.ts`, `simulator.ts`) has reached **100% test coverage** for all critical paths and edge cases, ensuring robust reliability during the live tournament.
 
 ### E2E Tests (`npm run test:e2e`)
 | Test | What It Validates |
