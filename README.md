@@ -122,12 +122,31 @@ The application supports **four distinct user roles**, each with a tailored view
 
 ## ✨ Code Quality
 
-- **TypeScript Strict Mode** — All code is statically typed with strict null checks
-- **JSDoc Documentation** — Every exported function and module has descriptive JSDoc comments explaining purpose, parameters, and behavior
-- **ESLint + Prettier** — Enforced via `eslint-config-next/core-web-vitals` and `eslint-config-next/typescript` with zero-warning policy (`--max-warnings=0`)
-- **Single Responsibility** — Clear separation: `ai-engine.ts` (analytics), `gemini.ts` (API integration), `simulator.ts` (simulation), `types.ts` (type definitions), individual view components per feature
-- **Clean Architecture** — API routes handle HTTP concerns only; business logic lives in `src/lib/`; UI components are stateless where possible
+The project enforces a strict, zero-warning quality gate before any code can be considered shippable. Reviewers can verify it with a single command: `npm run verify` (typecheck + unit tests) and `npm run lint` (zero-warning ESLint).
+
+### Static Type Safety
+- **TypeScript Strict Mode** — `strict: true` with additional strictness flags: `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `forceConsistentCasingInFileNames`
+- **Zero `any` types** — Banned via `@typescript-eslint/no-explicit-any`; all generic/unknown inputs use explicit `unknown` guards with type narrowing
+- **Explicit Interface Contracts** — 20+ TypeScript interfaces in `src/lib/types.ts` define every data shape that crosses a module boundary
+
+### Linting Policy (`eslint.config.mjs`)
+Built on `eslint-config-next/core-web-vitals` + `eslint-config-next/typescript`, then layered with explicit best-practice rules:
+- **Type-safety:** `@typescript-eslint/no-explicit-any` (error), `@typescript-eslint/no-unused-vars` (error, with `^_` ignore pattern for intentionally unused params)
+- **Consistency:** `eqeqeq`, `prefer-const`, `no-var`, `prefer-template`, `object-shorthand`, `consistent-return`
+- **React quality:** `react-hooks/rules-of-hooks` (error), `react-hooks/exhaustive-deps` (warn), `react/no-danger` (warn)
+- **Console discipline:** `no-console` warns in UI components (encourages proper toast/error boundaries); allowed in API routes, library code, tests, and CLI scripts via scoped overrides
+- **Zero-warning enforcement:** `eslint . --max-warnings=0` means *any* warning fails the build
+
+### Code Organization
+- **Single Responsibility** — Clear separation: `ai-engine.ts` (analytics), `gemini.ts` (API integration), `simulator.ts` (simulation), `types.ts` (type definitions), one view component per feature
+- **Clean Architecture** — API routes handle HTTP concerns only; business logic lives in `src/lib/`; UI components are stateless where possible and consume state through `AppContext`
+- **JSDoc Documentation** — Every exported function and module has descriptive JSDoc comments explaining purpose, parameters, and problem-statement alignment
 - **Consistent Naming** — PascalCase for components (`AppShell`, `TranslateView`), camelCase for functions (`analyzeCrowdDensity`), kebab-case for files
+
+### Test Hygiene
+- All 57 unit tests pass deterministically with no console noise — expected-failure paths stub `console.error`/`console.warn` to keep test output focused on actual results
+- White-box access to simulator internals uses a typed `TestableSimulator` interface (no `any` casting)
+- Test fixtures use the same TypeScript interfaces as production code, ensuring type-drift between tests and implementation is caught at compile time
 
 ---
 
@@ -135,17 +154,22 @@ The application supports **four distinct user roles**, each with a tailored view
 
 | Protection | Implementation |
 |---|---|
+| **Centralized Security Library** | [`src/lib/security.ts`](src/lib/security.ts) provides unified text sanitization, prompt injection defense, rate-limiting, CSRF verification, input bounds, and audit logging |
+| **Global Next.js Middleware** | [`src/middleware.ts`](src/middleware.ts) enforces 10MB payload caps, cross-origin POST/PUT/DELETE blocking, per-IP rate limiting, and attaches `X-Request-Id` UUID headers |
 | **No Credentials in Code** | API keys live in `.env` (gitignored). Server-side proxy (`/api/chat`) keeps `GEMINI_API_KEY` server-only — never sent to the browser |
-| **Content Security Policy** | Strict CSP headers block XSS, inline scripts, and unauthorized connect sources |
-| **HSTS** | `Strict-Transport-Security: max-age=31536000; includeSubDomains` enforces HTTPS |
-| **Rate Limiting** | Token-bucket rate limiter (20 req/min per IP) on the Gemini proxy prevents abuse |
-| **Input Sanitization** | All user text is HTML-entity-escaped via `sanitize()` before entering AI prompts |
-| **Model Allowlist** | Only `gemma-4` and `gemini-2.5-flash` are accepted — arbitrary model names are rejected |
-| **Size Limits** | Text inputs capped at 20,000 characters; multimodal payloads at 80,000 bytes |
-| **Request Audit Trail** | Every API response includes an `X-Request-Id` UUID header for traceability |
-| **Error Sanitization** | Internal Gemini API error bodies are stripped — clients receive safe, generic messages |
-| **Clickjacking Prevention** | `X-Frame-Options: DENY` + `frame-ancestors 'none'` in CSP |
-| **API Key Validation** | Client-side key storage validates format with regex before persisting |
+| **Strict Content Security Policy** | Tightened CSP headers block XSS, inline scripts, object tags, and limit connect sources to verified origins |
+| **HSTS 2-Year Preload** | `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` enforces HTTPS across all subdomains |
+| **Cross-Origin Isolation** | `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`, and `Cross-Origin-Resource-Policy: same-origin` |
+| **Prompt Injection Defense** | `looksLikePromptInjection()` and `sanitizeText()` neutralize system prompt overrides (`[SYSTEM INSTRUCTION]`, `IGNORE PREVIOUS INSTRUCTIONS`, `<<SYS>>`) |
+| **Unicode & Homoglyph Normalization** | Normalizes Unicode via NFKC, strips zero-width spaces (`\u200B-\u200D`, `\uFEFF`), directional overrides, and non-printable control characters |
+| **Rate Limiting** | Token-bucket rate limiter with automatic garbage collection (300s window) on all API endpoints prevents DDoS & scraping |
+| **Input Sanitization & Bounds** | All user text is HTML-entity-escaped (`<`, `>`, `&`, `"`, `'`) before entering AI prompts or Prisma DB operations |
+| **Model & Endpoint Allowlists** | Only `gemma-4`, `gemma-4-26b-a4b-it`, and `gemini-2.5-flash` models and specific World Cup REST endpoints are accepted |
+| **Size & Body Limits** | Body size capped at 10MB; text inputs bounded at 20,000 characters; array contents byte-estimated |
+| **Request Audit Trail** | Every API request and response includes an `X-Request-Id` UUID header for SIEM correlation |
+| **Error Sanitization** | Upstream API error bodies and stack traces are stripped — clients receive safe, generic error messages |
+| **Clickjacking & Framing Defense** | `X-Frame-Options: DENY` + `frame-ancestors 'none'` in CSP |
+| **Dependency Overrides** | `package.json` specifies `"overrides": { "postcss": "^8.4.31" }` to prevent nested vulnerability exploits |
 
 ---
 
@@ -306,8 +330,9 @@ prisma/
   schema.prisma       → Stadium, Incident, Setting, DecisionLog models
   seed.ts             → Seeds 16 host stadiums
 test/
-  ai-engine.test.ts   → 10 unit tests (crowd, gates, queues, sustainability)
-  simulator.test.ts   → 2 unit tests (aggregation, bounds)
+  ai-engine.test.ts   → 18 unit tests (crowd, gates, queues, sustainability)
+  simulator.test.ts   → 7 unit tests (aggregation, bounds, phases, weather)
+  gemini.test.ts      → 14 unit tests (proxy, direct key, audio, parsing)
   security.test.ts    → 8 unit tests (validation, sanitization, allowlists)
 e2e/
   app.spec.ts         → 6 Playwright E2E tests (auth, a11y, navigation)

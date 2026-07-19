@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import { StadiumAI } from "../src/lib/ai-engine";
-import type { Sector, Gate, Incident, QueueItem } from "../src/lib/types";
+import type { Sector, Gate, Incident, QueueItem, Sustainability } from "../src/lib/types";
 
 describe("StadiumAI - analyzeCrowdDensity", () => {
   it("handles empty sectors", () => {
@@ -13,9 +13,9 @@ describe("StadiumAI - analyzeCrowdDensity", () => {
 
   it("identifies red, amber, and green sectors accurately", () => {
     const sectors: Sector[] = [
-      { id: "1", name: "RedZone", density: 7, trend: 1, lastUpdated: "" },
-      { id: "2", name: "AmberZone", density: 5, trend: 0, lastUpdated: "" },
-      { id: "3", name: "GreenZone", density: 2, trend: -1, lastUpdated: "" },
+      { id: "1", name: "RedZone", density: 7, trend: 1 },
+      { id: "2", name: "AmberZone", density: 5, trend: 0 },
+      { id: "3", name: "GreenZone", density: 2, trend: -1 },
     ];
     const result = StadiumAI.analyzeCrowdDensity(sectors);
     
@@ -83,15 +83,15 @@ describe("StadiumAI - triageIncident", () => {
 
 describe("StadiumAI - predictQueueWait", () => {
   it("handles basic queue prediction", () => {
-    const q: QueueItem = { id: "q1", name: "Concession", type: "food", waitMinutes: 10, arrivalRate: 15, serviceRate: 10 };
+    const q: QueueItem = { id: "q1", name: "Concession", type: "food", waitMinutes: 10, arrivalRate: 15, serviceRate: 10, trend: 1 };
     const result = StadiumAI.predictQueueWait(q, [q]);
     assert.equal(result.predictedWait > 10, true);
     assert.equal(result.alternative, null);
   });
 
   it("finds lower wait alternatives of same type", () => {
-    const q1: QueueItem = { id: "q1", name: "Q1", type: "restroom", waitMinutes: 15, arrivalRate: 10, serviceRate: 10 };
-    const q2: QueueItem = { id: "q2", name: "Q2", type: "restroom", waitMinutes: 2, arrivalRate: 10, serviceRate: 10 };
+    const q1: QueueItem = { id: "q1", name: "Q1", type: "restroom", waitMinutes: 15, arrivalRate: 10, serviceRate: 10, trend: 0 };
+    const q2: QueueItem = { id: "q2", name: "Q2", type: "restroom", waitMinutes: 2, arrivalRate: 10, serviceRate: 10, trend: 0 };
     const result = StadiumAI.predictQueueWait(q1, [q1, q2]);
     assert.equal(result.alternative?.id, "q2");
     assert.equal(result.recommendation.includes("Route fans to Q2"), true);
@@ -101,8 +101,8 @@ describe("StadiumAI - predictQueueWait", () => {
 describe("StadiumAI - recommendStaffDeployment", () => {
   it("recommends staff based on density", () => {
     const sectors: Sector[] = [
-      { id: "1", name: "Red", density: 7, trend: 1, lastUpdated: "" },
-      { id: "2", name: "Amber", density: 5, trend: 0, lastUpdated: "" },
+      { id: "1", name: "Red", density: 7, trend: 1 },
+      { id: "2", name: "Amber", density: 5, trend: 0 },
     ];
     const result = StadiumAI.recommendStaffDeployment(sectors, []);
     assert.equal(result.recommendations.length, 2);
@@ -112,8 +112,8 @@ describe("StadiumAI - recommendStaffDeployment", () => {
 
   it("recommends staff based on open incidents", () => {
     const incidents: Incident[] = [
-      { id: "1", type: "medical", status: "open", location: "Gate A" },
-      { id: "2", type: "spill", status: "resolved", location: "Gate B" }, // Should be ignored
+      { id: "1", type: "medical", status: "open", location: "Gate A", crowdDensity: 4, minutesToKickoff: 30, createdAt: Date.now() },
+      { id: "2", type: "spill", status: "resolved", location: "Gate B", crowdDensity: 3, minutesToKickoff: 30, createdAt: Date.now() }, // Should be ignored
     ];
     const result = StadiumAI.recommendStaffDeployment([], incidents);
     assert.equal(result.recommendations.length, 1);
@@ -123,15 +123,29 @@ describe("StadiumAI - recommendStaffDeployment", () => {
 
 describe("StadiumAI - calculateSustainabilityScore", () => {
   it("scores sustainability metrics based on energy and waste", () => {
-    const metrics = { renewableEnergyPct: 80, gridLoadPct: 20, wasteDiversionPct: 50 };
-    const result = StadiumAI.calculateSustainabilityScore(metrics as any);
+    const metrics: Sustainability = {
+      fans: 1000,
+      transportKgCO2e: 100,
+      renewableEnergyPct: 80,
+      gridLoadPct: 20,
+      waterSavedLiters: 5000,
+      wasteDiversionPct: 50,
+    };
+    const result = StadiumAI.calculateSustainabilityScore(metrics);
     assert.equal(result.score > 0, true);
     assert.equal(result.energyEfficiency, 80);
     assert.equal(result.wasteDiversion, 50);
   });
 
   it("handles missing sustainability metrics", () => {
-    const result = StadiumAI.calculateSustainabilityScore({} as any);
+    const result = StadiumAI.calculateSustainabilityScore({
+      fans: 0,
+      transportKgCO2e: 0,
+      renewableEnergyPct: 0,
+      gridLoadPct: 0,
+      waterSavedLiters: 0,
+      wasteDiversionPct: 0,
+    });
     assert.equal(result.energyEfficiency, 30);
     assert.equal(result.wasteDiversion, 0);
   });

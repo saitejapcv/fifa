@@ -1,143 +1,131 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 /**
  * Server-side proxy for Gemini API requests.
  *
- * This route keeps the GEMINI_API_KEY server-only (never exposed to the browser),
- * enforces an allowlist of permitted models, validates input size, and applies
- * basic rate-limiting (token-bucket, 20 req/min per IP) to prevent abuse.
+ * SECURITY MODEL
+ * ---------------
+ * - The `GEMINI_API_KEY` lives only at server-side and is never echoed.
+ * - Client-supplied model names are constrained to an allow-list.
+ * - All text inputs are sanitized through `lib/security.sanitize()`.
+ * - Requests are CSRF-guarded (same-origin + JSON content-type).
+ * - Per-IP rate limiting (token bucket, 20 req/min) runs on top of the global
+ *   middleware-level rate limit.
+ * - Upstream Gemini error bodies are stripped before reaching the client.
+ * - All requests include an `X-Request-Id` audit header for SIEM correlation.
+ * - Multi-modal payloads have an explicit byte-size cap.
  *
  * @module /api/chat
  */
 
+import {
+  ALLOWED_MODELS,
+  MAX_BODY_BYTES,
+  MAX_TEXT_LENGTH,
+  enforceCsrf,
+  errorResponse,
+  estimateBytes,
+  getClientIp,
+  getOrNewRequestId,
+  isAllowed,
+  isRateLimited,
+  looksLikePromptInjection,
+  okResponse,
+  resolveModel,
+  sanitize,
+} from "@/lib/security";
+import { auditLog } from "@/lib/security";
+
 type GeminiRequest = {
-  query?: string;
-  system?: string;
-  model?: string;
+  query?: unknown;
+  system?: unknown;
+  model?: unknown;
   contents?: unknown[];
 };
 
-/* ---------- Security: model allow-list & input bounds ---------- */
-const ALLOWED_MODELS = new Set(["gemma-4", "gemini-2.5-flash"]);
-const MAX_TEXT_LENGTH = 20_000;
+/** Sanitize a string field that defaults to "". */
+const safeText = (v: unknown): string => sanitize(v);
+/** True if a string field passes length constraints. */
+const isLengthOk = (v: unknown): boolean =>
+  typeof v === "string" && v.length > 0 && v.length <= MAX_TEXT_LENGTH;
 
-const isSafeText = (value: unknown) =>
-  typeof value === "string" && value.length > 0 && value.length <= MAX_TEXT_LENGTH;
-
-/* ---------- Rate-limiter: in-memory token bucket (20 req/min) ---------- */
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 20;
-
-type TokenBucket = { tokens: number; lastRefill: number };
-const buckets = new Map<string, TokenBucket>();
-
-/** Garbage-collect expired buckets every 5 minutes to prevent memory leaks. */
-setInterval(() => {
-  const cutoff = Date.now() - RATE_LIMIT_WINDOW_MS * 2;
-  for (const [key, bucket] of buckets) {
-    if (bucket.lastRefill < cutoff) buckets.delete(key);
-  }
-}, 300_000);
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  let bucket = buckets.get(ip);
-
-  if (!bucket) {
-    bucket = { tokens: RATE_LIMIT_MAX, lastRefill: now };
-    buckets.set(ip, bucket);
-  }
-
-  // Refill tokens proportionally to elapsed time
-  const elapsed = now - bucket.lastRefill;
-  bucket.tokens = Math.min(
-    RATE_LIMIT_MAX,
-    bucket.tokens + (elapsed / RATE_LIMIT_WINDOW_MS) * RATE_LIMIT_MAX
-  );
-  bucket.lastRefill = now;
-
-  if (bucket.tokens < 1) return true;
-  bucket.tokens -= 1;
-  return false;
-}
-
-/* ---------- Efficient payload size estimation ---------- */
-function estimatePayloadBytes(contents: unknown[]): number {
-  let bytes = 0;
-  for (const item of contents) {
-    if (typeof item === "string") {
-      bytes += item.length;
-    } else if (typeof item === "object" && item !== null) {
-      // Walk one level deep for inline_data base64 strings
-      for (const val of Object.values(item as Record<string, unknown>)) {
-        if (typeof val === "string") bytes += val.length;
-        else if (typeof val === "object" && val !== null) {
-          for (const inner of Object.values(val as Record<string, unknown>)) {
-            if (typeof inner === "string") bytes += inner.length;
-          }
-        }
-      }
-    }
-  }
-  return bytes;
-}
-
-/* ---------- Handler ---------- */
 export async function POST(req: NextRequest) {
-  const requestId = crypto.randomUUID();
+  const requestId = getOrNewRequestId(req);
+
+  // 1. CSRF: same-origin + JSON content-type (rejects form-based CSRF).
+  const csrf = enforceCsrf(req, requestId);
+  if (csrf) return csrf;
+
+  // 2. Per-IP rate limit.
+  const ip = getClientIp(req);
+  if (isRateLimited(`chat:${ip}`)) {
+    auditLog("rate-limited", { ip, route: "chat" });
+    return errorResponse("Too many requests. Please wait before trying again.", 429, requestId, {
+      "Retry-After": "60",
+    });
+  }
 
   try {
-    // Rate limiting by IP
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      req.headers.get("x-real-ip") ??
-      "unknown";
-
-    if (isRateLimited(ip)) {
-      return NextResponse.json(
-        { error: "Too many requests. Please wait before trying again." },
-        { status: 429, headers: { "X-Request-Id": requestId, "Retry-After": "60" } }
-      );
+    const raw = await req.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return errorResponse("Request body too large.", 413, requestId);
+    }
+    let parsed: GeminiRequest;
+    try {
+      parsed = JSON.parse(raw) as GeminiRequest;
+    } catch {
+      return errorResponse("Malformed JSON request.", 400, requestId);
     }
 
-    const { query, system, model, contents } = (await req.json()) as GeminiRequest;
+    const { query, system, model, contents } = parsed;
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "Gemini API key is not configured on the server. Please check your environment variables." },
-        { status: 500, headers: { "X-Request-Id": requestId } }
-      );
+      // Do not reveal WHICH environment variable is missing.
+      return errorResponse("Service is not configured.", 500, requestId);
     }
 
-    if (!isSafeText(system) || (!isSafeText(query) && !Array.isArray(contents))) {
-      return NextResponse.json(
-        { error: "Invalid or oversized request." },
-        { status: 400, headers: { "X-Request-Id": requestId } }
-      );
+    // 3. Size & shape validation.
+    const systemOk = typeof system === "undefined" || (typeof system === "string" && system.length <= MAX_TEXT_LENGTH);
+    const queryOk = isLengthOk(query) || Array.isArray(contents);
+    if (!systemOk || !queryOk) {
+      auditLog("validation-failed", { ip, route: "chat", reason: "shape" });
+      return errorResponse("Invalid or oversized request.", 400, requestId);
+    }
+    if (Array.isArray(contents) && estimateBytes(contents) > MAX_TEXT_LENGTH * 4) {
+      return errorResponse("Request content is too large.", 413, requestId);
     }
 
-    if (Array.isArray(contents) && estimatePayloadBytes(contents) > MAX_TEXT_LENGTH * 4) {
-      return NextResponse.json(
-        { error: "Request content is too large." },
-        { status: 413, headers: { "X-Request-Id": requestId } }
-      );
+    // 4. Model allow-list.
+    const resolvedModel = resolveModel(model);
+    if (typeof model === "string" && model !== "" && !isAllowed(model, ALLOWED_MODELS)) {
+      auditLog("validation-failed", { ip, route: "chat", reason: "model" });
+      return errorResponse("Unsupported model.", 400, requestId);
     }
 
-    const MODEL = ALLOWED_MODELS.has(model ?? "") ? model ?? "gemma-4" : "gemma-4";
-    const resolvedModel = MODEL === "gemma-4" ? "gemma-4-26b-a4b-it" : MODEL;
+    // 5. Sanitize all text that will enter the AI prompt.
+    const sanitizedSystem = safeText(system) || "";
+    const sanitizedQuery = safeText(query);
+    if (looksLikePromptInjection(sanitizedQuery) || looksLikePromptInjection(sanitizedSystem)) {
+      auditLog("validation-failed", { ip, route: "chat", reason: "prompt-injection" });
+      // Soft-reject: do not reveal what tripped the detector.
+      return errorResponse("Request rejected by safety filter.", 400, requestId);
+    }
 
     const body: {
       system_instruction: { parts: Array<{ text: string }> };
       contents: unknown[];
       generationConfig: Record<string, unknown>;
     } = {
-      system_instruction: { parts: [{ text: system ?? "" }] },
-      contents: contents ?? [{ role: "user", parts: [{ text: query ?? "" }] }],
-      generationConfig: { 
-        temperature: 0.4, 
+      system_instruction: { parts: [{ text: sanitizedSystem }] },
+      contents:
+        contents ?? [{ role: "user", parts: [{ text: sanitizedQuery }] }],
+      generationConfig: {
+        temperature: 0.4,
         maxOutputTokens: 1024,
-        ...(resolvedModel.startsWith("gemma-4") ? { thinkingConfig: { thinkingLevel: "minimal" } } : {})
+        ...(resolvedModel.startsWith("gemma-4")
+          ? { thinkingConfig: { thinkingLevel: "minimal" } }
+          : {}),
       },
     };
 
@@ -145,9 +133,9 @@ export async function POST(req: NextRequest) {
       body.generationConfig.responseMimeType = "application/json";
     }
 
+    // 6. Upstream call with timeout.
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30_000);
-
     try {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${resolvedModel}:generateContent?key=${apiKey}`,
@@ -160,24 +148,22 @@ export async function POST(req: NextRequest) {
       );
 
       if (!res.ok) {
-        // Strip internal Gemini error details — return a safe, generic message
+        // Strip internal Gemini error details — return safe, generic messages.
         const status = res.status;
         const safeMessage =
-          status === 400 ? "The request was malformed or contained unsupported content." :
-          status === 429 ? "Gemini API rate limit exceeded. Please try again shortly." :
-          status >= 500 ? "Gemini API is temporarily unavailable." :
-          `Gemini API returned an error (${status}).`;
-
-        return NextResponse.json(
-          { error: safeMessage },
-          { status, headers: { "X-Request-Id": requestId } }
-        );
+          status === 400
+            ? "The request was malformed or contained unsupported content."
+            : status === 429
+            ? "Gemini API rate limit exceeded. Please try again shortly."
+            : status >= 500
+            ? "Gemini API is temporarily unavailable."
+            : `Gemini API returned an error (${status}).`;
+        return errorResponse(safeMessage, status, requestId);
       }
 
       const payload = await res.json();
-      return NextResponse.json(payload, {
-        headers: { "X-Request-Id": requestId },
-      });
+      auditLog("ok", { ip, route: "chat", model: resolvedModel });
+      return okResponse(payload, requestId);
     } finally {
       clearTimeout(timeout);
     }
@@ -186,10 +172,6 @@ export async function POST(req: NextRequest) {
       e instanceof DOMException && e.name === "AbortError"
         ? "Request timed out after 30 seconds."
         : "Failed to process Gemini query.";
-
-    return NextResponse.json(
-      { error: message },
-      { status: 500, headers: { "X-Request-Id": requestId } }
-    );
+    return errorResponse(message, 500, requestId);
   }
 }

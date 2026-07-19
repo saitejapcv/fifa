@@ -48,21 +48,7 @@ const isRecord = (value: unknown): value is ImportedRecord =>
 const MODEL = "gemma-4";
 const RESOLVED_MODEL = MODEL === "gemma-4" ? "gemma-4-26b-a4b-it" : MODEL;
 const IS_GEMMA = RESOLVED_MODEL.startsWith("gemma-4");
-
-function sanitize(value: string) {
-  return String(value ?? "")
-    .replace(/[<>&"']/g, (char) => {
-      const map: Record<string, string> = {
-        "<": "&lt;",
-        ">": "&gt;",
-        "&": "&amp;",
-        '"': "&quot;",
-        "'": "&#39;",
-      };
-      return map[char];
-    })
-    .trim();
-}
+import { sanitize } from "./security";
 
 /** Retrieve the user's Gemini API key from localStorage (client-only). */
 export function getStoredGeminiKey() {
@@ -158,14 +144,16 @@ export async function askAssistant(
   try {
     const { games, stadiums } = await fetchWorldCupData();
     const gamesContext = games.length > 0
-      ? `World Cup 2026 Match Schedule and Locations:\n` + games.map((g) => {
-          const stadium = stadiums.find((s) => String(s.id) === String(g.stadium_id));
-          const stadiumName = stadium ? stadium.fifa_name || stadium.name_en : `Stadium ${g.stadium_id}`;
-          const home = g.home_team_name_en || g.home_team_label || "TBD";
-          const away = g.away_team_name_en || g.away_team_label || "TBD";
-          const score = g.finished === "TRUE" ? ` (Score: ${g.home_score}-${g.away_score})` : "";
-          return `- Match ${g.id}: ${home} vs ${away} on ${g.local_date} at ${stadiumName} (${g.type} stage)${score}`;
-        }).join("\n")
+      ? `World Cup 2026 Match Schedule and Locations:\n${games
+          .map((g) => {
+            const stadium = stadiums.find((s) => String(s.id) === String(g.stadium_id));
+            const stadiumName = stadium ? stadium.fifa_name || stadium.name_en : `Stadium ${g.stadium_id}`;
+            const home = g.home_team_name_en || g.home_team_label || "TBD";
+            const away = g.away_team_name_en || g.away_team_label || "TBD";
+            const score = g.finished === "TRUE" ? ` (Score: ${g.home_score}-${g.away_score})` : "";
+            return `- Match ${g.id}: ${home} vs ${away} on ${g.local_date} at ${stadiumName} (${g.type} stage)${score}`;
+          })
+          .join("\n")}`
       : "No match data available.";
 
     const densitySummary = (context.sectors || [])

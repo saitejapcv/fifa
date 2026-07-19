@@ -1,6 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { aggregateSectors, StadiumSimulator } from "../src/lib/simulator";
+import { aggregateSectors, StadiumSimulator, type SimEvent, type WeatherState } from "../src/lib/simulator";
+
+/**
+ * A test-only view of StadiumSimulator that exposes private methods and fields
+ * used in white-box tests. Defined here (not in the source) to keep the public
+ * API of StadiumSimulator clean while still enabling deterministic unit tests
+ * that need to invoke internal lifecycle methods directly.
+ */
+interface TestableSimulator {
+  updateWeather(): void;
+  broadcast(event: SimEvent): void;
+  isRunning: boolean;
+  incidentTimerId: ReturnType<typeof setTimeout> | null;
+}
+
+function asTestable(sim: StadiumSimulator): TestableSimulator {
+  // Access private members through an intermediate `unknown` cast so we don't
+  // collide with private modifiers in the original class definition.
+  return sim as unknown as TestableSimulator;
+}
 
 test("sector aggregation groups lower and upper bowl sectors consistently", () => {
   const aggregate = aggregateSectors({
@@ -104,6 +123,7 @@ test("simulator match phase progression", () => {
 
 test("simulator triggers incidents and weather", async () => {
   const simulator = new StadiumSimulator();
+  const testable = asTestable(simulator);
   let incidentEmitted = false;
   let weatherEmitted = false;
   
@@ -113,14 +133,14 @@ test("simulator triggers incidents and weather", async () => {
   });
 
   // Force invoke private methods to test without waiting 20-40 seconds
-  (simulator as any).updateWeather();
+  testable.updateWeather();
   assert.equal(weatherEmitted, true);
   
   // Force invoke incident creation inner logic by overriding scheduleNextIncident
-  const originalTimer = (simulator as any).incidentTimerId;
-  (simulator as any).incidentTimerId = setTimeout(() => {
-    (simulator as any).isRunning = true;
-    (simulator as any).broadcast({
+  const originalTimer = testable.incidentTimerId;
+  testable.incidentTimerId = setTimeout(() => {
+    testable.isRunning = true;
+    testable.broadcast({
       type: "incident",
       timestamp: Date.now(),
       incident: {
@@ -138,4 +158,11 @@ test("simulator triggers incidents and weather", async () => {
   
   simulator.stop();
   if (originalTimer) clearTimeout(originalTimer);
+});
+
+// Ensure WeatherState shape is stable (guards against accidental type drift).
+test("WeatherState fields are all numeric/strings as expected", () => {
+  const w: WeatherState = { temperature: 21.5, humidity: 60, windSpeed: 5.5, condition: "sunny" };
+  assert.equal(typeof w.temperature, "number");
+  assert.equal(typeof w.condition, "string");
 });

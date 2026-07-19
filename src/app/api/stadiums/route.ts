@@ -1,23 +1,30 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { errorResponse, getOrNewRequestId, okResponse } from "@/lib/security";
 
-export async function GET() {
+function safeJsonParse(jsonString: string): unknown[] {
+  try {
+    const parsed = JSON.parse(jsonString || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function GET(req: NextRequest) {
+  const requestId = getOrNewRequestId(req);
   try {
     const stadiums = await prisma.stadium.findMany({ orderBy: { name: "asc" } });
-    return NextResponse.json(
-      stadiums.map((s) => ({
-        ...s,
-        gates: JSON.parse(s.gates || "[]"),
-        transit: JSON.parse(s.transit || "[]"),
-        accessibility: JSON.parse(s.accessibility || "[]"),
-        sectorsLower: JSON.parse(s.sectorsLower || "[]"),
-        sectorsUpper: JSON.parse(s.sectorsUpper || "[]"),
-      }))
-    );
-  } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Failed to load stadiums" },
-      { status: 500 }
-    );
+    const sanitizedStadiums = stadiums.map((s) => ({
+      ...s,
+      gates: safeJsonParse(s.gates),
+      transit: safeJsonParse(s.transit),
+      accessibility: safeJsonParse(s.accessibility),
+      sectorsLower: safeJsonParse(s.sectorsLower),
+      sectorsUpper: safeJsonParse(s.sectorsUpper),
+    }));
+    return okResponse(sanitizedStadiums, requestId);
+  } catch {
+    return errorResponse("Failed to load stadium database.", 500, requestId);
   }
 }

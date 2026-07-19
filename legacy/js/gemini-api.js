@@ -81,7 +81,7 @@
       }
 
       const body = {
-        systemInstruction: {
+        system_instruction: {
           parts: [{ text: buildSystemInstruction(context) }]
         },
         contents: [

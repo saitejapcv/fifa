@@ -128,7 +128,6 @@ export function TranslateView() {
       const result = await translateText(prompt, targetName);
       setTranslatedText(result);
       pushToast("Translated Successfully", `${srcName} ➔ ${targetName}`, "success");
-      return result;
     } catch (err) {
       pushToast("Translation Failed", err instanceof Error ? err.message : "Check your network or Gemini API Key.", "danger");
     } finally {

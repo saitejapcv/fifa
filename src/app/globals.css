@@ -109,6 +109,17 @@ body {
   text-anchor: middle;
 }
 
+/* Animated route path used by the Stadium Map component. */
+@keyframes svgDash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.path-route-animated {
+  stroke-dasharray: 6, 4;
+  animation: svgDash 1.2s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

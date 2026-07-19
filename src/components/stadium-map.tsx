@@ -61,18 +61,7 @@ export function StadiumMapView() {
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-claude-border bg-claude-surface shadow-soft">
-      {/* SVG Style animation injector */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes svgDash {
-          to {
-            stroke-dashoffset: -20;
-          }
-        }
-        .path-route-animated {
-          stroke-dasharray: 6,4;
-          animation: svgDash 1.2s linear infinite;
-        }
-      `}} />
+      {/* CSS for route animation lives in globals.css (.path-route-animated) */}
 
       {/* Header operations header */}
       {state.role === "fan" ? (

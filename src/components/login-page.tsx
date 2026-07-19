@@ -49,6 +49,9 @@ export function LoginPage({ isInitialized }: { isInitialized: boolean }) {
   };
 
   const handleQuickFill = (role: Role) => {
+    // Demo-only: pre-fill placeholder credentials so reviewers/contributors can
+    // test the app without first seeding the local DB. These are NOT production
+    // secrets — all auth state lives in localStorage and is reset on logout.
     setActiveTab(role);
     if (role === "fan") {
       setTicketNo("TICKET-METLIFE");

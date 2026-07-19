@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test, { describe, beforeEach, afterEach, it } from "node:test";
+import { describe, beforeEach, afterEach, it } from "node:test";
 import { clearGeminiKey, getStoredGeminiKey, saveGeminiKey, askAssistant, parseRosterData, translateText, translateAudio } from "../src/lib/gemini";
 
 function installBrowserStorage(initialValues: Record<string, string> = {}) {
@@ -20,20 +20,28 @@ function installBrowserStorage(initialValues: Record<string, string> = {}) {
   return storage;
 }
 
-function mockFetch(responses: Record<string, any>) {
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+  text: () => Promise<string>;
+};
+
+function mockFetch(responses: Record<string, unknown>) {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (url: string | URL | Request, options?: any) => {
+  globalThis.fetch = (async (url: string | URL | Request): Promise<FetchResponse> => {
     const urlString = url.toString();
     for (const [key, response] of Object.entries(responses)) {
       if (urlString.includes(key)) {
-        if (response.error) {
-          return { ok: false, status: response.status || 500, json: async () => ({ error: response.error }), text: async () => response.error } as Response;
+        const r = response as { error?: string; status?: number };
+        if (r.error) {
+          return { ok: false, status: r.status || 500, json: async () => ({ error: r.error }), text: async () => r.error || "" };
         }
-        return { ok: true, status: 200, json: async () => response, text: async () => JSON.stringify(response) } as Response;
+        return { ok: true, status: 200, json: async () => response, text: async () => JSON.stringify(response) };
       }
     }
-    return { ok: true, status: 200, json: async () => ({}), text: async () => "{}" } as Response;
-  };
+    return { ok: true, status: 200, json: async () => ({}), text: async () => "{}" };
+  }) as unknown as typeof globalThis.fetch;
   return () => {
     globalThis.fetch = originalFetch;
   };
@@ -76,6 +84,7 @@ describe("Gemini Storage Tests", () => {
 
 describe("Gemini Function Tests", () => {
   let restoreFetch: () => void;
+  let restoreConsole: () => void;
 
   beforeEach(() => {
     installBrowserStorage();
@@ -83,7 +92,25 @@ describe("Gemini Function Tests", () => {
 
   afterEach(() => {
     if (restoreFetch) restoreFetch();
+    if (restoreConsole) restoreConsole();
   });
+
+  /**
+   * Several tests intentionally drive error/fallback paths in `gemini.ts`, which
+   * log to `console.error` and `console.warn` as part of their normal behaviour.
+   * Those logs are expected — not failures — so we stub them to keep the test
+   * runner output focused on actual test results.
+   */
+  function silenceConsole() {
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    console.error = () => {};
+    console.warn = () => {};
+    restoreConsole = () => {
+      console.error = originalError;
+      console.warn = originalWarn;
+    };
+  }
 
   it("askAssistant throws on empty query", async () => {
     await assert.rejects(async () => {
@@ -98,12 +125,13 @@ describe("Gemini Function Tests", () => {
       "/api/worldcup?endpoint=teams": { teams: [{ id: "1" }] },
       "/api/chat": { candidates: [{ content: { parts: [{ text: 'Server response' }] } }] }
     });
-    const res = await askAssistant("Hello", { venueName: "Test Venue", sectors: [{ name: "A", density: 100 }], incidents: [{ type: "medical", status: "open", location: "A" }] });
+    const res = await askAssistant("Hello", { venueName: "Test Venue", sectors: [{ id: "a", name: "A", density: 100, trend: 1 }], incidents: [{ id: "i1", type: "medical", status: "open", location: "A", crowdDensity: 4, minutesToKickoff: 30, createdAt: Date.now() }] });
     assert.equal(res.summary, "Server response");
     assert.equal(res.source, "gemini-proxy");
   });
 
   it("askAssistant handles server proxy failure and returns fallback", async () => {
+    silenceConsole();
     restoreFetch = mockFetch({
       "/api/worldcup": {},
       "/api/chat": { error: "Failed", status: 500 }
@@ -133,6 +161,7 @@ describe("Gemini Function Tests", () => {
   });
 
   it("parseRosterData returns empty object for empty input", async () => {
+    silenceConsole();
     const res = await parseRosterData("");
     assert.equal(res.tickets.length, 0);
   });
@@ -146,6 +175,7 @@ describe("Gemini Function Tests", () => {
   });
 
   it("parseRosterData handles direct key and failure gracefully via fallback CSV parser", async () => {
+    silenceConsole();
     installBrowserStorage({ "fifa2026.geminiApiKey": "valid_key_1234567890" });
     restoreFetch = mockFetch({
       "generativelanguage.googleapis.com": { error: "Failed", status: 500 }
@@ -164,6 +194,7 @@ describe("Gemini Function Tests", () => {
   });
 
   it("translateText throws on failure", async () => {
+    silenceConsole();
     restoreFetch = mockFetch({
       "/api/chat": { error: "Failed", status: 500 }
     });
@@ -173,6 +204,7 @@ describe("Gemini Function Tests", () => {
   });
   
   it("translateText directly uses API key and throws on failure", async () => {
+    silenceConsole();
     installBrowserStorage({ "fifa2026.geminiApiKey": "valid_key_1234567890" });
     restoreFetch = mockFetch({
       "generativelanguage.googleapis.com": { error: "Failed", status: 500 }
@@ -202,6 +234,7 @@ describe("Gemini Function Tests", () => {
   });
 
   it("translateAudio returns empty strings on failure", async () => {
+    silenceConsole();
     restoreFetch = mockFetch({
       "/api/chat": { error: "Failed", status: 500 }
     });
